@@ -108,13 +108,48 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (populated by roadmapper) | | |
+| DINP-01 | Phase 1 | Pending |
+| DINP-02 | Phase 1 | Pending |
+| DINP-03 | Phase 1 | Pending |
+| DINP-04 | Phase 1 | Pending |
+| DINP-05 | Phase 1 | Pending |
+| PIPE-01 | Phase 1 | Pending |
+| PIPE-02 | Phase 1 | Pending |
+| PIPE-03 | Phase 1 | Pending |
+| PIPE-04 | Phase 1 | Pending |
+| PIPE-05 | Phase 1 | Pending |
+| SCOR-01 | Phase 2 | Pending |
+| SCOR-02 | Phase 2 | Pending |
+| SCOR-03 | Phase 2 | Pending |
+| SCOR-04 | Phase 2 | Pending |
+| KBAS-01 | Phase 2 | Pending |
+| KBAS-02 | Phase 2 | Pending |
+| KBAS-03 | Phase 2 | Pending |
+| KBAS-04 | Phase 2 | Pending |
+| AILG-01 | Phase 3 | Pending |
+| AILG-02 | Phase 3 | Pending |
+| AILG-03 | Phase 3 | Pending |
+| AILG-04 | Phase 3 | Pending |
+| AILG-05 | Phase 3 | Pending |
+| AILG-06 | Phase 3 | Pending |
+| CHRT-01 | Phase 3 | Pending |
+| CHRT-02 | Phase 3 | Pending |
+| CHRT-03 | Phase 3 | Pending |
+| CHRT-04 | Phase 3 | Pending |
+| CHRT-05 | Phase 3 | Pending |
+| UIUX-01 | Phase 3 | Pending |
+| UIUX-02 | Phase 3 | Pending |
+| UIUX-03 | Phase 3 | Pending |
+| UIUX-04 | Phase 3 | Pending |
+| UIUX-05 | Phase 3 | Pending |
+| UIUX-06 | Phase 3 | Pending |
+| UIUX-07 | Phase 3 | Pending |
 
 **Coverage:**
-- v1 requirements: 33 total
-- Mapped to phases: 0
-- Unmapped: 33
+- v1 requirements: 36 total
+- Mapped to phases: 36
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after initial definition*
+*Last updated: 2026-03-23 after roadmap creation (traceability populated)*
