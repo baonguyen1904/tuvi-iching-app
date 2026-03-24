@@ -1,155 +1,118 @@
-# Requirements: Kinh Dich x Tu Vi — AI Luan Giai MVP
+# Requirements: Kinh Dịch × Tử Vi — AI Luận Giải MVP
 
-**Defined:** 2026-03-23
-**Core Value:** User enters birth data and receives an accurate, personalized, expert-level Tu Vi interpretation that is empowering — powered by AI but grounded in validated scoring logic and expert-curated knowledge.
+**Defined:** 2026-03-24
+**Core Value:** Users receive personalized, expert-quality AI narrative interpretations of their Tử Vi chart across 7 life dimensions, grounded in real scoring data.
 
 ## v1 Requirements
 
-Requirements for initial release (test with ~20-50 expert clients).
-
-### Data Input
-
-- [ ] **DINP-01**: User can enter birth date via date picker (duong lich / solar calendar)
-- [ ] **DINP-02**: User can select birth time from dropdown of 12 canh gio, or "khong ro" (unknown)
-- [ ] **DINP-03**: User can select gender (Nam/Nu)
-- [ ] **DINP-04**: User can optionally enter their name (ho ten)
-- [ ] **DINP-05**: System converts duong lich to am lich (lunar calendar) correctly, including intercalary months
-
 ### Data Pipeline
 
-- [ ] **PIPE-01**: System scrapes cohoc.net to generate a complete la so (12 cung x sao placements) from birth data
-- [ ] **PIPE-02**: System extracts all chinh tinh (14 major stars) and phu tinh (minor stars) positions from scraped data
-- [ ] **PIPE-03**: System determines Cung Menh from la so data
-- [ ] **PIPE-04**: System caches la so results so identical birth data does not re-scrape
-- [ ] **PIPE-05**: System handles cohoc.net unavailability gracefully with Vietnamese error message and retry option
+- [ ] **DATA-01**: Scrape tuvi.cohoc.net with birth data → parse lá số cả đời + vận 10 năm (12 cung × sao placements)
+- [ ] **DATA-02**: Scrape tuvi.vn with birth data → parse lá số 12 tháng (12 cung × sao placements)
+- [ ] **DATA-03**: Port existing Selenium scrapers from legacy codebase (`/mnt/d/Working/TBTesu/tuvi/scraper/`) to new project
+- [ ] **DATA-04**: Cache lá số results — same birth data returns cached result without re-scraping
 
 ### Scoring Engine
 
-- [ ] **SCOR-01**: System calculates Duong (positive), Am (negative), and TB (neutral) scores per dimension from sao placements
-- [ ] **SCOR-02**: System calculates scores for 3 time horizons: ca doi (lifetime, moc 10 nam), 10 nam (decade, moc tung nam), 12 thang (monthly)
-- [ ] **SCOR-03**: System detects alert-triggering sao combinations and generates positive (triangle up) and negative (triangle down) alerts with tag text
-- [ ] **SCOR-04**: Scoring logic matches validated Google Sheets output for 20+ test cases
+- [ ] **SCORE-01**: Port Google Sheet scoring logic (laso_points lookup tables) to Python
+- [ ] **SCORE-02**: Calculate per-dimension scores (Dương/Âm/TB) across all time periods (cả đời, 10 năm, 12 tháng)
+- [ ] **SCORE-03**: Alert system — detect sao combinations and trigger 🔺 (positive) / 🔻 (negative) alerts with tag text
 
 ### Knowledge Base
 
-- [ ] **KBAS-01**: 7 dimension-specific markdown KB files exist (su nghiep, tien bac, hon nhan, suc khoe, dat dai, hoc tap, con cai)
-- [ ] **KBAS-02**: Core reference files exist (scoring_rules.md, alert_interpretation.md, tone_guidelines.md)
-- [ ] **KBAS-03**: Star reference files exist for chinh tinh (14 major stars) and phu tinh
-- [ ] **KBAS-04**: Each KB file fits within ~5-10K tokens for inline prompt injection (no RAG needed)
+- [ ] **KB-01**: Create 7 dimension KB markdown files (sự nghiệp, tiền bạc, hôn nhân, sức khỏe, đất đai, học tập, con cái)
+- [ ] **KB-02**: Create core rules files (scoring_rules.md, alert_interpretation.md, tone_guidelines.md)
 
-### AI Luan Giai
+### AI Luận Giải
 
-- [ ] **AILG-01**: System generates personalized narrative luan giai per dimension via Claude API with structured output (tong quan, phan tich giai doan, moc chu y, loi khuyen, disclaimer)
-- [ ] **AILG-02**: AI responses stream to frontend in real-time (SSE)
-- [ ] **AILG-03**: AI tone is empowering and positive — no fear-inducing predictions; every negative alert includes actionable advice
-- [ ] **AILG-04**: AI only references stars and data present in the user's actual la so (no hallucinated sao)
-- [ ] **AILG-05**: System generates a tong quan van menh (cross-dimension overview summary, 3-5 sentences) shown on result page before dimension selection
-- [ ] **AILG-06**: Dimension luan giai is generated on-demand when user clicks a dimension (not all upfront)
+- [ ] **AI-01**: Per-dimension AI call — Claude Sonnet with structured prompt + KB context + score data → personalized narrative
+- [ ] **AI-02**: Tổng quan vận mệnh — AI summary (3-5 câu) across all dimensions, shown on result page
 
-### Charts & Visualization
+### Chart Visualization
 
-- [ ] **CHRT-01**: Result page displays scoring line charts per dimension: ca doi (X=age ranges, Y=score, lines for Duong/Am/TB)
-- [ ] **CHRT-02**: Result page displays decade charts per dimension: 10 nam (X=individual years, Y=score, lines for Duong/Am/TB)
-- [ ] **CHRT-03**: Alert markers (triangle up/triangle down) are visible on charts at relevant time points
-- [ ] **CHRT-04**: Charts are rendered client-side from score data JSON
-- [ ] **CHRT-05**: Charts are mobile-responsive
+- [ ] **CHART-01**: Lifetime chart per dimension — X=age ranges (10-year blocks), Y=score, lines for Dương/Âm/TB
+- [ ] **CHART-02**: Decade chart per dimension — X=individual years, Y=score, lines for Dương/Âm/TB
+- [ ] **CHART-03**: Alert markers visible on charts (🔺🔻 at relevant time points)
 
-### User Flow & Web Interface
+### Web Interface
 
-- [ ] **UIUX-01**: Landing page with CTA "Bat dau" leads to input form
-- [ ] **UIUX-02**: Processing screen shows multi-step progress ("Dang lay la so..." → "Dang phan tich..." → "Dang tao luan giai...")
-- [ ] **UIUX-03**: Result page shows header (name, birth info) + overview chart + AI summary + 7 dimension buttons
-- [ ] **UIUX-04**: Dimension detail page shows dimension-specific charts + streamed AI luan giai text
-- [ ] **UIUX-05**: Each result has a shareable URL (no login required)
-- [ ] **UIUX-06**: Entire interface is in Vietnamese
-- [ ] **UIUX-07**: All pages are mobile-responsive
+- [ ] **WEB-01**: Landing page with CTA "Bắt đầu"
+- [ ] **WEB-02**: Input form — ngày sinh (date picker), giờ sinh (dropdown 12 canh hoặc "không rõ"), giới tính (Nam/Nữ), họ tên (optional)
+- [ ] **WEB-03**: Processing screen with progress states ("Đang lấy lá số...", "Đang phân tích...", "Đang tạo luận giải...")
+- [ ] **WEB-04**: Result page — header (tên, birth info) + tổng quan vận mệnh + 7 dimension buttons
+- [ ] **WEB-05**: Dimension detail page — dimension-specific charts + AI luận giải text
+- [ ] **WEB-06**: Mobile responsive design
 
 ## v2 Requirements
 
-Deferred to future release. Tracked but not in current roadmap.
+### Enhanced Data Pipeline
 
-### Enhanced Interpretations
+- **DATA-05**: Self-hosted tử vi calculation engine (eliminate scraper dependency)
+- **DATA-06**: Graceful error handling when scraper sources are down
 
-- **EITP-01**: Two-level explanation depth (basic overview vs. in-depth analysis per dimension)
-- **EITP-02**: Age-appropriate interpretation guidance (20-30, 30-45, 45-60, 60+)
+### Enhanced AI
 
-### Social & Sharing
+- **AI-03**: Streaming AI response to frontend for better UX
+- **AI-04**: Star reference files (chính tinh + phụ tinh) in KB for richer interpretation
+- **AI-05**: Expert-approved few-shot examples in prompts
 
-- **SOCL-01**: Email/link sharing improvements based on test group feedback
-- **SOCL-02**: Compatibility / partner chart comparison
+### Enhanced Web
 
-### Infrastructure
+- **WEB-07**: Shareable URL per result (no login required)
+- **WEB-08**: Overview chart — summary visualization across all dimensions
 
-- **INFR-01**: Fallback la so calculation engine (if cohoc.net scraper breaks permanently)
-- **INFR-02**: User accounts and saved readings
-- **INFR-03**: PWA install prompt for mobile users
+### Social & Accounts
+
+- **SOCL-01**: User accounts / login for saved results
+- **SOCL-02**: Chatbot hỏi đáp follow-up
+
+### Export
+
+- **EXPO-01**: PDF/PPTX export of results
 
 ## Out of Scope
 
-Explicitly excluded. Documented to prevent scope creep.
-
 | Feature | Reason |
 |---------|--------|
-| User login / accounts | Adds friction; shareable URLs solve "save" need for MVP test group |
-| Payment / monetization | Test value first; do not introduce payment friction during validation |
-| Chatbot / conversational AI | Changes product from structured reading to open-ended chat; high complexity and cost |
-| Kinh Dich gieo que | Separate domain and knowledge base; validate Tu Vi MVP first |
-| PDF export | Low value for test group; browser print works for power users |
-| Push notifications | Requires accounts; no accounts in MVP |
-| Multi-dimension comparison view | Complexity vs value tradeoff; individual readings first |
-| Bilingual support (English) | Vietnamese-only for MVP; internationalization later |
-| Mobile native app | Web-first; responsive design covers 95% of value at 10% cost |
-| Fear-based predictions / fate language | Ethical and product-quality anti-feature; explicitly prohibited |
-| Daily horoscopes / planetary transits | Tu Vi is birth-chart based (static); daily horoscope is a different product category |
+| Kinh Dịch gieo quẻ | Separate module, not part of Tử Vi MVP |
+| Payment / premium tiers | MVP is free for test group (~20-50 people) |
+| Push notifications | No user accounts in MVP |
+| Multi-dimension comparison charts | Nice-to-have, not core to MVP validation |
+| RAG pipeline | KB fits in context window (~5-10K tokens per dimension) |
+| Bilingual (English) | Vietnamese only for MVP |
+| OAuth / social login | No auth at all in MVP |
+| Mobile app (React Native/Flutter) | Web-first for MVP |
 
 ## Traceability
 
-Which phases cover which requirements. Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DINP-01 | Phase 1 | Pending |
-| DINP-02 | Phase 1 | Pending |
-| DINP-03 | Phase 1 | Pending |
-| DINP-04 | Phase 1 | Pending |
-| DINP-05 | Phase 1 | Pending |
-| PIPE-01 | Phase 1 | Pending |
-| PIPE-02 | Phase 1 | Pending |
-| PIPE-03 | Phase 1 | Pending |
-| PIPE-04 | Phase 1 | Pending |
-| PIPE-05 | Phase 1 | Pending |
-| SCOR-01 | Phase 2 | Pending |
-| SCOR-02 | Phase 2 | Pending |
-| SCOR-03 | Phase 2 | Pending |
-| SCOR-04 | Phase 2 | Pending |
-| KBAS-01 | Phase 2 | Pending |
-| KBAS-02 | Phase 2 | Pending |
-| KBAS-03 | Phase 2 | Pending |
-| KBAS-04 | Phase 2 | Pending |
-| AILG-01 | Phase 3 | Pending |
-| AILG-02 | Phase 3 | Pending |
-| AILG-03 | Phase 3 | Pending |
-| AILG-04 | Phase 3 | Pending |
-| AILG-05 | Phase 3 | Pending |
-| AILG-06 | Phase 3 | Pending |
-| CHRT-01 | Phase 3 | Pending |
-| CHRT-02 | Phase 3 | Pending |
-| CHRT-03 | Phase 3 | Pending |
-| CHRT-04 | Phase 3 | Pending |
-| CHRT-05 | Phase 3 | Pending |
-| UIUX-01 | Phase 3 | Pending |
-| UIUX-02 | Phase 3 | Pending |
-| UIUX-03 | Phase 3 | Pending |
-| UIUX-04 | Phase 3 | Pending |
-| UIUX-05 | Phase 3 | Pending |
-| UIUX-06 | Phase 3 | Pending |
-| UIUX-07 | Phase 3 | Pending |
+| DATA-01 | — | Pending |
+| DATA-02 | — | Pending |
+| DATA-03 | — | Pending |
+| DATA-04 | — | Pending |
+| SCORE-01 | — | Pending |
+| SCORE-02 | — | Pending |
+| SCORE-03 | — | Pending |
+| KB-01 | — | Pending |
+| KB-02 | — | Pending |
+| AI-01 | — | Pending |
+| AI-02 | — | Pending |
+| CHART-01 | — | Pending |
+| CHART-02 | — | Pending |
+| CHART-03 | — | Pending |
+| WEB-01 | — | Pending |
+| WEB-02 | — | Pending |
+| WEB-03 | — | Pending |
+| WEB-04 | — | Pending |
+| WEB-05 | — | Pending |
+| WEB-06 | — | Pending |
 
 **Coverage:**
-- v1 requirements: 36 total
-- Mapped to phases: 36
-- Unmapped: 0
+- v1 requirements: 20 total
+- Mapped to phases: 0
+- Unmapped: 20 ⚠️
 
 ---
-*Requirements defined: 2026-03-23*
-*Last updated: 2026-03-23 after roadmap creation (traceability populated)*
+*Requirements defined: 2026-03-24*
+*Last updated: 2026-03-24 after initial definition*
