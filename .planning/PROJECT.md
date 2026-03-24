@@ -1,12 +1,12 @@
-# Kinh Dich x Tu Vi — AI Luan Giai MVP
+# Kinh Dịch × Tử Vi — AI Luận Giải MVP
 
 ## What This Is
 
-A web application that takes a user's birth data (ngay gio sinh), generates a Vietnamese Tu Vi (astrology) chart with scores across life dimensions, and uses an AI agent (Claude) to produce personalized narrative interpretations ("luan giai") for each dimension. Built as an MVP to test with ~20-50 existing clients of a domain expert partner.
+A web app that takes a user's birth data (ngày giờ sinh), generates a Vietnamese Tử Vi (astrology) chart with scores across life dimensions, and uses Claude AI to produce personalized narrative interpretations ("luận giải") for each dimension. This is an MVP for testing with ~20-50 existing clients of our expert partner — not a full product launch.
 
 ## Core Value
 
-User enters birth data and receives an accurate, personalized, expert-level Tu Vi interpretation that is empowering (not fear-inducing) — powered by AI but grounded in validated scoring logic and expert-curated knowledge.
+Users receive personalized, expert-quality AI narrative interpretations of their Tử Vi chart across 7 life dimensions, grounded in real scoring data — empowering, not fear-inducing.
 
 ## Requirements
 
@@ -16,72 +16,71 @@ User enters birth data and receives an accurate, personalized, expert-level Tu V
 
 ### Active
 
-- [ ] Data pipeline: scrape cohoc.net to generate structured la so (12 cung x sao placements) from birth data
-- [ ] Duong lich to Am lich conversion for Tu Vi calculations
-- [ ] Scoring engine: port Google Sheet scoring logic to Python (Duong/Am/TB scores per dimension per time horizon)
-- [ ] Alert system: detect sao combinations triggering positive/negative alerts with tags
-- [ ] Knowledge base: 7 dimension-specific markdown files + core/star reference files for AI prompt injection
-- [ ] AI luan giai engine: per-dimension narrative generation via Claude API with structured output and tone rules
-- [ ] Streaming AI responses to frontend for real-time UX
-- [ ] Tong quan van menh: cross-dimension overview summary generation
-- [ ] Chart visualization: lifetime and decade charts with Duong/Am/TB lines and alert markers
-- [ ] User flow: landing page → input form → processing screen → result page → dimension detail pages
-- [ ] Shareable result URLs (no login required)
-- [ ] Mobile-responsive web interface
-- [ ] Caching for la so data (same birth data = same chart)
-- [ ] Graceful error handling when cohoc.net is unavailable
+- [ ] User nhập ngày sinh (dương lịch), giờ sinh (12 canh hoặc "không rõ"), giới tính, tên (optional) → hệ thống tạo lá số
+- [ ] Scrape cohoc.net để lấy lá số (12 cung × sao placements), cache kết quả
+- [ ] Dương lịch → Âm lịch conversion
+- [ ] Port Google Sheet scoring logic (laso_points) sang Python — tính scores per dimension per time period
+- [ ] Alert system: Phát hiện tổ hợp sao → trigger 🔺 (positive) và 🔻 (negative) alerts với tag text
+- [ ] Khi "không rõ giờ sinh" → bỏ qua yếu tố phụ thuộc giờ sinh
+- [ ] Knowledge Base: Markdown files per dimension + core rules, expert-reviewed
+- [ ] AI luận giải per dimension: Claude Sonnet API call với structured prompt + KB context + score data
+- [ ] Output structure: Tổng quan → Phân tích giai đoạn → Mốc cần chú ý → Lời khuyên → Disclaimer
+- [ ] Tone rules: Tích cực, empowering, mỗi 🔻 kèm lời khuyên, "cần thận trọng" thay "sẽ gặp họa", disclaimer cuối
+- [ ] Tổng quan vận mệnh: AI summary 3-5 câu across all dimensions, hiện trên result page
+- [ ] Streaming: AI response streamed to frontend
+- [ ] Charts: Cả đời (lifetime) + 10 năm (decade) per dimension, lines Dương/Âm/TB, alert markers
+- [ ] Overview chart trên result page
+- [ ] Landing page → Input form → Processing screen → Result page → Dimension detail page
+- [ ] Shareable URL per result (no login required)
+- [ ] Mobile responsive
 
 ### Out of Scope
 
-- Login/accounts — reduce friction, shareable links instead (MVP)
-- Payment/monetization — test value first, monetize later
-- Chatbot/conversational AI — structured output only for MVP
-- Kinh Dich gieo que — separate feature, not in this MVP
-- PDF export — not needed for test group
-- Push notifications — no accounts = no push
-- Multi-dimension comparison view — complexity vs value tradeoff
-- Bilingual support — Vietnamese only for MVP
-- Mobile native app — web-first approach
+- Chatbot hỏi đáp — Phase 2+, not MVP
+- Kinh Dịch gieo quẻ — Separate module, deferred
+- User accounts / login — Reduce friction for MVP
+- Payment / premium — MVP is free for test group
+- PDF/PPTX export — Web view thay thế
+- Push notifications — No accounts means no push
+- Multi-dimension comparison charts — Nice-to-have, not core
+- RAG pipeline — KB fits in context window (~5-10K tokens), no need
+- OAuth / social login — Email/password not needed either, no auth at all
+- Bilingual (English) — Vietnamese only for MVP
 
 ## Context
 
-**Domain:** Vietnamese Tu Vi (astrology) is a complex system using lunar calendar, 14 major stars (chinh tinh), minor stars (phu tinh), 12 cung (houses), and scoring across 7 life dimensions (su nghiep, tien bac, hon nhan, suc khoe, dat dai, hoc tap, con cai).
-
-**Expert partner:** A Tu Vi expert with existing client base (~20-50 people) who will review AI outputs for accuracy and curate the knowledge base. Limited availability (~5 hours total across 3 sessions).
-
-**Existing assets:**
-- Working scoring engine in Google Sheets (laso_points lookup tables) — validated by expert over many readings
-- Scraper target: tuvi.cohoc.net/lap-la-so-tu-vi.html for la so generation
-- Research documents: market analysis, MVP scope definition, user research framework (not yet executed)
-
-**Key risk:** Scraper dependency on cohoc.net (could change HTML or block requests). AI hallucination must be constrained to provided data only.
-
-**Test methodology:** The discovery framework and persona hypotheses are NOT yet validated. This MVP exists to generate evidence before full validation.
+- **Expert partner**: Domain expert in Tử Vi with existing client base (~20-50 people). Limited availability (~5h total for KB review sessions).
+- **Existing scoring engine**: Google Sheet with lookup tables (laso_points) — validated by expert over many readings. Ready to port.
+- **Scraper tested**: cohoc.net scraping approach verified, HTML structure known.
+- **Knowledge Base approach**: Markdown files injected into AI prompt as context. ~5-10K tokens per dimension call. No RAG needed for MVP.
+- **Expert sessions planned**: Session 1 (2h) demo luận giải, Session 2 (2h) review KBs, Session 3 (1h) review AI output.
+- **Personas (hypotheses, not validated)**: "Người tìm hướng" (25-40, urban), Business owners (30-50), Việt Kiều, Gen Z spiritual — MVP tests with existing clients only.
+- **Positioning**: "Risk intelligence" not "fortune telling" — empowering, not superstitious.
 
 ## Constraints
 
 - **Timeline**: 2-4 weeks
 - **Team**: 1 developer (using Claude Code), 1 domain expert (~5h availability)
-- **Budget**: Minimal — free/cheap infrastructure (Vercel free tier, Railway starter)
-- **Test group**: ~20-50 existing expert clients
-- **Language**: Vietnamese only
-- **AI model**: Claude Sonnet API (Vietnamese quality, 200K context, structured prompts)
-- **Tone (non-negotiable)**: Positive/empowering language, no fear-inducing predictions, every negative alert must include actionable advice
+- **Budget**: Minimal — free/cheap infrastructure (Vercel + Railway)
+- **Language**: Vietnamese only for MVP
+- **Test group**: ~20-50 existing clients of expert
+- **Scraper dependency**: cohoc.net could change/block — need caching + error handling
+- **Expert time**: Only ~5h total — must be pre-prepared and efficient
+- **AI model**: Claude Sonnet API — 200K context window sufficient for structured prompt + inline KB
+- **Tech stack**: Next.js (frontend) + Python FastAPI (backend) + SQLite/Supabase (cache) + Chart.js/Recharts (charts)
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Next.js frontend | SSR for SEO, React ecosystem | — Pending |
-| Python FastAPI backend | Scraper + scoring logic fits Python | — Pending |
-| Claude Sonnet API for AI | Vietnamese quality, 200K context | — Pending |
-| Structured prompt + inline KB (no RAG) | KB fits in context window (~5-10K tokens per dimension) | — Pending |
-| SQLite or Supabase for caching | MVP only needs la so caching | — Pending |
-| Chart.js or Recharts for charts | Standard, well-documented | — Pending |
-| Vercel (frontend) + Railway (backend) | Fast, cheap deployment | — Pending |
-| No auth for MVP | Reduce friction, shareable links | — Pending |
-| Scrape cohoc.net for la so | Fastest path to working la so generation | — Pending |
-| On-demand dimension generation | Generate luan giai when user clicks dimension, not all upfront | — Pending |
+| Structured prompt + inline KB (no RAG) | KB fits in ~5-10K tokens per dimension, Claude 200K context is plenty | — Pending |
+| Scrape cohoc.net for lá số | Already tested and working, fastest path to MVP | — Pending |
+| Per-dimension AI calls (not all at once) | Manageable prompt size, streaming UX, on-demand generation | — Pending |
+| No authentication | Reduce friction, shareable links, MVP test group only | — Pending |
+| Claude Sonnet (not GPT) | Vietnamese quality tốt, large context window | — Pending |
+| Web view instead of PPTX | Faster iteration, mobile-friendly, streaming support | — Pending |
+| Next.js + Python FastAPI | SSR for SEO (Next.js), scraper + scoring logic natural in Python | — Pending |
+| "Không rõ giờ sinh" → skip time-dependent calculations | Simpler than guessing, more honest to user | — Pending |
 
 ## Evolution
 
@@ -101,4 +100,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-23 after initialization*
+*Last updated: 2026-03-24 after initialization*
