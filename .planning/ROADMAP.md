@@ -28,7 +28,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. The same birth data requested a second time returns a cached result without re-scraping
   4. Per-dimension scores (Dương/Âm/TB) are computed across all time periods (cả đời, 10 năm, 12 tháng)
   5. Sao combination alerts (🔺 positive / 🔻 negative) are detected and returned with tag text
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Scaffold backend project, port schemas/constants/soup_utils (Wave 1)
+- [ ] 01-02-PLAN.md — Export laso_points.xlsx to JSON + implement scoring engine (Wave 2)
+- [ ] 01-03-PLAN.md — Port cohoc.net Selenium scraper + HTML parsing tests (Wave 2)
+- [ ] 01-04-PLAN.md — Port tuvi.vn Selenium scraper + HTML parsing tests (Wave 2)
+- [ ] 01-05-PLAN.md — Supabase cache module + FastAPI /api/la-so endpoint (Wave 3)
 
 ### Phase 2: Knowledge Base & AI Luận Giải
 **Goal**: Given scored lá số data, the system generates expert-quality Vietnamese narrative interpretations for each of the 7 life dimensions
@@ -62,6 +69,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Data Pipeline & Scoring Engine | 0/? | Not started | - |
+| 1. Data Pipeline & Scoring Engine | 0/5 | Not started | - |
 | 2. Knowledge Base & AI Luận Giải | 0/? | Not started | - |
 | 3. Charts & Web Interface | 0/? | Not started | - |
