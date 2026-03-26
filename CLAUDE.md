@@ -53,9 +53,14 @@
 1. **KHÔNG bịa data** — AI chỉ luận giải dựa trên scoring data + KB context được cung cấp
 2. **Tone tích cực** — Mỗi cảnh báo 🔻 PHẢI kèm lời khuyên. Dùng "cần thận trọng", KHÔNG dùng "sẽ gặp họa"
 3. **Giờ sinh bắt buộc** — Nếu user không biết giờ sinh → từ chối, hiện message giải thích tại sao
-4. **Pre-generate all 7 dimensions** — Khi user submit, generate tất cả 7 luận giải + overview. Không lazy-load
-5. **Cache by birth data** — Cùng ngày/giờ/giới tính = cùng lá số. Cache scrape result + scores
-6. **Mobile-first** — Design responsive, test trên mobile trước desktop
+4. **8 dimensions** — van_menh + 7 lĩnh vực (su_nghiep, tien_bac, hon_nhan, suc_khoe, dat_dai, hoc_tap, con_cai). van_menh có charts nhưng KHÔNG có alerts
+5. **2 scrapers** — tuvi.cohoc.net (lifetime + 10yr) + tuvi.vn (monthly). Cả 2 phải scrape cho 1 profile
+6. **Pre-generate all dimensions** — Khi user submit, generate tất cả luận giải + overview. Không lazy-load
+7. **Star matching dùng python-slugify** — `slugify(name.lower())` cho cả 2 phía (laso_points + scraper output). KHÔNG thay đổi matching logic
+8. **Empty weight = 1** — Trong laso_points, nếu dimension weight trống → dùng 1 (không skip star)
+9. **Anchor từ LIFETIME data** — House weighting anchor luôn tính từ cung lifetime, kể cả khi scoring 10yr/monthly
+10. **Cache by birth data** — Cùng ngày/giờ/giới tính/năm xem = cùng kết quả. Cache scrape + scores
+11. **Mobile-first** — Design responsive, test trên mobile trước desktop
 
 ---
 
@@ -77,9 +82,10 @@
 │   │   ├── main.py
 │   │   ├── routers/
 │   │   ├── services/
-│   │   │   ├── scraper.py     # Playwright scraper
-│   │   │   ├── scoring.py     # Scoring engine
-│   │   │   └── ai_engine.py   # Claude API + prompt builder
+│   │   │   ├── scraper_cohoc.py  # Playwright (lifetime + 10yr)
+│   │   │   ├── scraper_tuvivn.py # Playwright (monthly)
+│   │   │   ├── scoring.py        # Scoring engine
+│   │   │   └── ai_engine.py      # Claude API + prompt builder
 │   │   ├── models/
 │   │   └── knowledge_base/    # KB markdown files
 │   └── tests/

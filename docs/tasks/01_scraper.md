@@ -1,125 +1,266 @@
 # Task 01: Scraper Pipeline
-## cohoc.net → Structured Lá Số Data
+## TWO Scrapers → Structured Lá Số Data
 
 **Priority:** Must — blocks everything else
-**Estimated effort:** 2-3 days
+**Estimated effort:** 3-4 days
 **Dependencies:** None
-**Output:** Python module `services/scraper.py`
+**Output:** `services/scraper_cohoc.py` + `services/scraper_tuvivn.py`
 
 ---
 
-## What to Build
+## CRITICAL FINDING: Two Data Sources
 
-A Playwright-based async scraper that:
-1. Takes birth data (date, hour, gender) as input
-2. Submits to tuvi.cohoc.net/lap-la-so-tu-vi.html
-3. Parses the returned HTML
-4. Extracts structured lá số data (12 cung × sao)
-5. Returns a typed Python dataclass
+The existing codebase uses **TWO different websites** for different time scales:
+
+| Source | URL | Provides | Used for |
+|--------|-----|----------|----------|
+| tuvi.cohoc.net | `/lay-la-so-tu-vi-ngay-duong-lich.html` | `cung` (lifetime) + `cung_10yrs` (Đại Vận) | Lifetime chart + 10-year chart |
+| tuvi.vn | (form submit with `nam_xem`) | `cung_12months` (sorted by month) | Monthly chart |
+
+**Both must be scraped** for a complete profile. They share the same birth data input but return different chart perspectives.
 
 ---
 
-## Input
+## Scraper A: tuvi.cohoc.net (Lifetime + 10-Year)
 
+### What it does
+1. POST birth data to cohoc.net form
+2. Parse result HTML → extract 12 cung (lifetime) + 12 cung_10yrs (Đại Vận)
+3. Return structured data
+
+### Input
 ```python
 @dataclass
 class BirthInput:
-    birth_date: date        # dương lịch, e.g., 1968-04-20
-    birth_hour: str         # enum: ty, suu, dan, mao, thin, ty_, ngo, mui, than, dau, tuat, hoi
-    gender: str             # "male" or "female"
-    name: str | None = None # optional, not used for scraping
+    birth_date: date         # dương lịch
+    birth_hour: str          # ty, suu, dan, mao, thin, ty_, ngo, mui, than, dau, tuat, hoi
+    gender: str              # "male" or "female"
+    name: str | None = None
 ```
 
-## Output
-
+### Output
 ```python
 @dataclass
 class Star:
-    name: str               # e.g., "Thiên Đồng"
-    type: str               # "chinh_tinh" or "phu_tinh"
+    name: str                # e.g., "Phá Quân" (base name, cleaned)
+    raw_name: str            # e.g., "Phá Quân\n(Đ)" (original from HTML)
+    variant: str | None      # "Đ", "H", "M", or None
+    slug: str                # slugify(raw_name.lower()) for matching
 
 @dataclass
 class Cung:
-    name: str               # e.g., "Mệnh", "Phụ Mẫu", "Phúc Đức", ...
-    position: int           # 1-12 (vị trí trên lá số)
+    name: str                # e.g., "Mệnh" (cleaned, "Thân" suffix stripped)
     stars: list[Star]
 
 @dataclass
-class LasoData:
-    cung_menh: str          # tên cung mệnh
-    ngu_hanh: str           # ngũ hành (Kim/Mộc/Thủy/Hỏa/Thổ)
-    lunar_year: str         # năm âm lịch (e.g., "Mậu Thân")
-    lunar_info: str         # full âm lịch string
-    cungs: list[Cung]       # 12 cung with stars
-    raw_html: str | None    # optional: store raw HTML for debugging
+class CohocData:
+    # Metadata
+    nam: str                 # Năm âm lịch, e.g., "Giáp Tuất"
+    menh: str                # Mệnh ngũ hành, e.g., "Mộc"
+    cuc: str                 # Cục, e.g., "Thủy Nhị Cục"
+    than_cu: str             # Cung Thân cư, e.g., "Thiên Di"
+    menh_chu: str            # Mệnh chủ sao
+    than_chu: str            # Thân chủ sao
+    am_duong: str            # "Dương Nam", "Âm Nữ", etc.
+    
+    # Chart data
+    cung: list[Cung]         # 12 cung — lifetime chart
+    cung_10yrs: list[Cung]   # 12 cung — Đại Vận (10-year periods), ordered by time
+```
+
+### Star Name Parsing (CRITICAL)
+
+Stars from cohoc.net come with embedded newlines for variant suffixes:
+
+```
+Raw HTML text        → raw_name          → name        → variant → slug
+"Phá Quân\n(Đ)"     → "Phá Quân\n(Đ)"  → "Phá Quân"  → "Đ"     → "pha-quan-d"
+"Tử Vi"             → "Tử Vi"           → "Tử Vi"     → None    → "tu-vi"
+"L.Hồng Loan"       → "L.Hồng Loan"    → "L.Hồng Loan" → None  → "l-hong-loan"
+"ĐV. T Khôi"        → "ĐV. T Khôi"     → "ĐV. T Khôi" → None   → "dv-t-khoi"
+```
+
+**Parsing logic:**
+```python
+import re
+from slugify import slugify
+
+def parse_star(raw_text: str) -> Star:
+    raw_name = raw_text.strip()
+    
+    # Extract variant suffix: (Đ), (H), (M)
+    variant_match = re.search(r'\(([ĐHM])\)', raw_name)
+    variant = variant_match.group(1) if variant_match else None
+    
+    # Clean name (remove newlines, keep variant in slug)
+    name = re.sub(r'\n.*', '', raw_name).strip()  # base name without variant
+    
+    # Slug for matching against laso_points
+    slug = slugify(raw_name.lower())  # includes variant: "pha-quan-d"
+    
+    return Star(name=name, raw_name=raw_name, variant=variant, slug=slug)
+```
+
+### Đại Vận Ordering Logic
+
+The 10-year chart cungs are ordered based on `am_duong` and current year:
+
+```python
+LUNA_YEARS = {
+    2022: "Dần", 2023: "Mão", 2024: "Thìn", 2025: "Tị", 2026: "Ngọ",
+    2027: "Mùi", 2028: "Thân", 2029: "Dậu", 2030: "Tuất", 2031: "Hợi",
+    2032: "Tí",  2033: "Sửu",  # ... extends in 12-year cycle
+}
+
+# Ordering arrays (from existing code):
+MAIN_ORDER = [0, 1, 2, 3, 5, 7, 11, 10, 9, 8, 6, 4]      # Dương Nam / Âm Nữ
+REVERSED_ORDER = [0, 4, 6, 8, 9, 10, 11, 7, 5, 3, 2, 1]   # Âm Nam / Dương Nữ
+```
+
+The website handles this ordering. Scraper just extracts `cung_10yrs` in the order presented.
+
+### HTML Parsing Details
+
+```python
+# Cung extraction selectors (from existing code):
+chinh_tinh = cung_td.select_one("div.cung-top > div.chinh-tinh > p:nth-child(1) > span").text
+sao_tot = cung_td.select("div.cung-middle > ul.sao-tot > li")
+sao_xau = cung_td.select("div.cung-middle > ul.sao-xau > li")
+sao_bottom = cung_td.select_one("div.cung-bottom > p > span").text
+
+# Cung name: strip "Thân" suffix
+ten_cung = re.sub(r"\s+Thân$", "", raw_text, flags=re.IGNORECASE).strip()
+
+# Metadata extraction uses Unicode NFC normalization
+```
+
+### Edge Cases from Existing Code
+
+1. **IP rate-limit:** URL contains `ip-deny` → raise error, retry later
+2. **Cache not found:** URL contains `cache-not-found` → wait up to 90s for server to generate
+3. **Unicode:** Apply NFC normalization for metadata fields
+4. **"Thân" suffix:** Some cung names have " Thân" appended → strip it
+
+---
+
+## Scraper B: tuvi.vn (Monthly)
+
+### What it does
+1. Submit birth data + `nam_xem` (year to analyze) to tuvi.vn
+2. Parse result → extract 12 cung with month labels
+3. Return sorted by month
+
+### Output
+```python
+@dataclass
+class MonthlyCung:
+    name: str                # Cung name
+    month: int               # 1-12
+    month_label: str         # "Th.1", "Th.2", etc.
+    stars: list[Star]
+
+@dataclass
+class TuViVnData:
+    cung_12months: list[MonthlyCung]  # 12 entries, sorted by month
+```
+
+### Star Filtering
+tuvi.vn uses CSS class `d-none` to hide irrelevant stars:
+```python
+# MUST filter out hidden stars:
+if "d-none" not in div.get("class", []):
+    sao.append(text)
 ```
 
 ---
 
-## Implementation Notes
+## Combined Output
 
-### Playwright Setup
+```python
+@dataclass
+class LasoData:
+    """Complete chart data from both sources."""
+    # Metadata (from cohoc)
+    nam: str
+    menh: str
+    cuc: str
+    than_cu: str
+    menh_chu: str
+    than_chu: str
+    am_duong: str
+    
+    # Chart data
+    cung: list[Cung]              # Lifetime (12 cungs) — from cohoc
+    cung_10yrs: list[Cung]        # Đại Vận (12 cungs, ordered) — from cohoc
+    cung_12months: list[MonthlyCung]  # Monthly (12, sorted) — from tuvi.vn
+```
+
+---
+
+## Implementation: Playwright Migration
+
+Existing code uses `undetected-chromedriver` (Selenium). Port to **Playwright** (async):
+
 ```python
 from playwright.async_api import async_playwright
 
-async def scrape_laso(input: BirthInput) -> LasoData:
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        # ... navigate, fill, submit, parse
+class CohocScraper:
+    async def scrape(self, input: BirthInput) -> CohocData:
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            
+            await page.goto(COHOC_URL)
+            # Fill form fields...
+            await page.click('input[type="submit"]')
+            
+            # Wait for result (handle cache-not-found retry)
+            await page.wait_for_selector('div.cung-top', timeout=90000)
+            
+            html = await page.content()
+            return self._parse(html, input)
+    
+    def _parse(self, html: str, input: BirthInput) -> CohocData:
+        # BeautifulSoup parsing (same selectors as existing code)
+        ...
+
+class TuViVnScraper:
+    async def scrape(self, input: BirthInput, nam_xem: int) -> TuViVnData:
+        # Similar pattern, different URL and form
+        ...
 ```
-
-### Form Fields on cohoc.net
-- Inspect the form at `tuvi.cohoc.net/lap-la-so-tu-vi.html`
-- Map `birth_hour` enum to the website's dropdown values
-- Map `gender` to the website's radio/select values
-- Handle dương lịch → the site may do its own conversion
-
-### HTML Parsing
-- After form submission, wait for result page to render
-- 12 cung are displayed in a grid/table structure
-- Each cung contains sao names (likely in a specific CSS class or HTML structure)
-- **IMPORTANT:** Parse carefully — the HTML structure may vary. Use robust selectors.
-
-### Error Handling
-- Timeout: set 30 second timeout for page load
-- Network error: raise `ScraperError` with descriptive message
-- Unexpected HTML: log raw HTML, raise `ParseError`
-- Rate limiting: add 1-2 second delay between requests
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `scrape_laso()` returns `LasoData` for valid input
-- [ ] All 12 cung are parsed with correct star names
-- [ ] Works for at least 5 different birth dates (see test fixtures)
-- [ ] Handles timeout gracefully (raises `ScraperError` after 30s)
-- [ ] Async-compatible (can be called from FastAPI endpoint)
-- [ ] Raw HTML is stored for debugging when `debug=True`
-- [ ] Logging: info-level log for each scrape attempt (no PII in logs, just "scraping for profile {hash}")
+- [ ] **Cohoc scraper:** Returns `CohocData` with 12 cung + 12 cung_10yrs for valid input
+- [ ] **TuViVn scraper:** Returns `TuViVnData` with 12 monthly cungs sorted by month
+- [ ] **Star names:** Correctly parse variant suffixes (Đ/H/M) from newline-embedded format
+- [ ] **Star slugs:** `slugify(raw_name.lower())` produces correct slugs matching laso_points
+- [ ] **L. prefix stars** and **ĐV. prefix stars** are captured
+- [ ] **d-none filter:** Hidden stars on tuvi.vn are excluded
+- [ ] **Cung name cleaning:** "Thân" suffix stripped
+- [ ] **Unicode:** NFC normalization applied
+- [ ] **Error handling:** Timeout (90s), IP rate-limit, cache-not-found retry
+- [ ] **Async:** Both scrapers work with asyncio (FastAPI compatible)
+- [ ] **Test:** 5 birth data inputs produce consistent, verifiable output
+- [ ] **Logging:** Info-level per scrape (no PII), warning for parse issues
 
 ---
 
 ## Test Cases
 
-Use these birth data as fixtures (compare output with manual cohoc.net check):
+| # | Birth Date | Hour | Gender | Verify |
+|---|-----------|------|--------|--------|
+| 1 | 1994-07-19 | dan (06h) | male | Matches existing report output (payload from code) |
+| 2 | 1968-04-20 | dau | female | Different generation |
+| 3 | 1990-01-15 | ngo | male | Edge: early January |
+| 4 | 2000-12-31 | ty | female | Edge: year-end |
+| 5 | 1985-06-10 | mao | male | Mid-range |
 
-| # | Birth Date | Hour | Gender | Expected Cung Mệnh | Notes |
-|---|-----------|------|--------|--------------------|----|
-| 1 | 1968-04-20 | dau | female | TBD (verify manually) | Primary test case |
-| 2 | 1990-01-15 | ngo | male | TBD | Different generation |
-| 3 | 2000-12-31 | ty | female | TBD | Edge: year-end |
-| 4 | 1985-06-10 | mao | male | TBD | Mid-range |
-| 5 | 1975-09-22 | hoi | female | TBD | Different hour |
-
-**Before implementation:** Manually go to cohoc.net with these inputs, screenshot results, and fill in "Expected Cung Mệnh" + save the full lá số as reference.
-
----
-
-## Edge Cases
-
-- What if cohoc.net is down? → Raise `ScraperError("Service unavailable")`
-- What if HTML structure changes? → ParseError with raw HTML for debugging
-- What if the site returns a captcha? → Log + raise error (handle manually for now)
-- Birth dates at year boundaries (Dec 31 → lunar calendar may be different year)
+For test case 1, we have the existing payload format to compare against:
+```python
+# Expected payload from existing code:
+{"full_name": "Test", "ngay_sinh": "19/07/1994", "gio_sinh": "06h00", "gender": "Nam"}
+```
