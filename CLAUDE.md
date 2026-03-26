@@ -1,61 +1,100 @@
-<!-- GSD:project-start source:PROJECT.md -->
-## Project
+# CLAUDE.md — Đọc đầu tiên mỗi session
 
-**Kinh Dịch × Tử Vi — AI Luận Giải MVP**
+## Project: Tử Vi AI Luận Giải MVP
 
-A web app that takes a user's birth data (ngày giờ sinh), generates a Vietnamese Tử Vi (astrology) chart with scores across life dimensions, and uses Claude AI to produce personalized narrative interpretations ("luận giải") for each dimension. This is an MVP for testing with ~20-50 existing clients of our expert partner — not a full product launch.
+**One-liner:** User nhập ngày giờ sinh → Hệ thống tính lá số + scores → AI sinh luận giải cá nhân hóa cho 7 lĩnh vực → User đọc trên web.
 
-**Core Value:** Users receive personalized, expert-quality AI narrative interpretations of their Tử Vi chart across 7 life dimensions, grounded in real scoring data — empowering, not fear-inducing.
+**Phase:** MVP (2-4 tuần)
+**Test group:** ~20-50 khách cũ của expert partner
+**Tên app:** TBD (dùng placeholder "TuVi AI" trong code, dễ đổi sau)
 
-### Constraints
+---
 
-- **Timeline**: 2-4 weeks
-- **Team**: 1 developer (using Claude Code), 1 domain expert (~5h availability)
-- **Budget**: Minimal — free/cheap infrastructure (Vercel + Railway)
-- **Language**: Vietnamese only for MVP
-- **Test group**: ~20-50 existing clients of expert
-- **Scraper dependency**: cohoc.net could change/block — need caching + error handling
-- **Expert time**: Only ~5h total — must be pre-prepared and efficient
-- **AI model**: Claude Sonnet API — 200K context window sufficient for structured prompt + inline KB
-- **Tech stack**: Next.js (frontend) + Python FastAPI (backend) + SQLite/Supabase (cache) + Chart.js/Recharts (charts)
-<!-- GSD:project-end -->
+## Quick Reference
 
-<!-- GSD:stack-start source:STACK.md -->
-## Technology Stack
+| Doc | Đọc khi nào |
+|-----|-------------|
+| `docs/SPEC.md` | Hiểu product: features, user flow, business rules |
+| `docs/ARCHITECTURE.md` | Hiểu tech stack, data flow, API contracts |
+| `docs/DECISIONS.md` | Hiểu TẠI SAO chọn approach này (không debate lại) |
+| `tasks/01_scraper.md` | Build data pipeline (scrape + parse lá số) |
+| `tasks/02_scoring_engine.md` | Port scoring logic từ Google Sheet → Python |
+| `tasks/03_ai_pipeline.md` | Build AI luận giải engine (prompt + KB + streaming) |
+| `tasks/04_frontend.md` | Build web app (landing page + input + results + charts) |
+| `tests/EXPECTED_OUTPUTS.md` | Validate outputs match expected behavior |
 
-Technology stack not yet documented. Will populate after codebase mapping or first phase.
-<!-- GSD:stack-end -->
+---
 
-<!-- GSD:conventions-start source:CONVENTIONS.md -->
-## Conventions
+## Tech Stack (đã quyết định)
 
-Conventions not yet established. Will populate as patterns emerge during development.
-<!-- GSD:conventions-end -->
+- **Frontend:** Next.js (App Router, TypeScript)
+- **Backend:** Python FastAPI
+- **Scraper:** Playwright (async, headless)
+- **AI:** Claude Sonnet API (structured prompt, no RAG)
+- **DB:** SQLite (MVP cache only)
+- **Charts:** Recharts
+- **Deploy:** Vercel (frontend) + Railway (backend)
 
-<!-- GSD:architecture-start source:ARCHITECTURE.md -->
-## Architecture
+---
 
-Architecture not yet mapped. Follow existing patterns found in the codebase.
-<!-- GSD:architecture-end -->
+## Coding Conventions
 
-<!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
+- Python: snake_case, type hints, async where possible
+- TypeScript: camelCase, strict mode
+- API responses: camelCase JSON
+- Vietnamese text in KB/prompts: UTF-8, no escaping
+- File names: kebab-case
+- Commits: conventional commits (feat:, fix:, docs:, chore:)
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+---
 
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
+## Critical Rules
 
-Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
-<!-- GSD:workflow-end -->
+1. **KHÔNG bịa data** — AI chỉ luận giải dựa trên scoring data + KB context được cung cấp
+2. **Tone tích cực** — Mỗi cảnh báo 🔻 PHẢI kèm lời khuyên. Dùng "cần thận trọng", KHÔNG dùng "sẽ gặp họa"
+3. **Giờ sinh bắt buộc** — Nếu user không biết giờ sinh → từ chối, hiện message giải thích tại sao
+4. **Pre-generate all 7 dimensions** — Khi user submit, generate tất cả 7 luận giải + overview. Không lazy-load
+5. **Cache by birth data** — Cùng ngày/giờ/giới tính = cùng lá số. Cache scrape result + scores
+6. **Mobile-first** — Design responsive, test trên mobile trước desktop
 
+---
 
+## Project Structure (target)
 
-<!-- GSD:profile-start -->
-## Developer Profile
+```
+/
+├── frontend/                  # Next.js app
+│   ├── app/
+│   │   ├── page.tsx           # Landing page
+│   │   ├── form/page.tsx      # Input form
+│   │   ├── processing/[id]/   # Processing screen
+│   │   └── result/[id]/       # Result + dimension detail
+│   ├── components/
+│   └── lib/
+│
+├── backend/                   # Python FastAPI
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── routers/
+│   │   ├── services/
+│   │   │   ├── scraper.py     # Playwright scraper
+│   │   │   ├── scoring.py     # Scoring engine
+│   │   │   └── ai_engine.py   # Claude API + prompt builder
+│   │   ├── models/
+│   │   └── knowledge_base/    # KB markdown files
+│   └── tests/
+│
+├── docs/                      # Specs & decisions
+├── tasks/                     # Task definitions
+└── tests/                     # Integration test fixtures
+```
 
-> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
-<!-- GSD:profile-end -->
+---
+
+## How to Work
+
+1. Đọc task file trước khi code (`tasks/0X_*.md`)
+2. Check acceptance criteria trong task file
+3. Run tests sau mỗi milestone
+4. Không thay đổi architecture decisions mà không update `docs/DECISIONS.md`
+5. Khi gặp edge case không có trong spec → comment `// TODO: clarify` và tiếp tục
