@@ -50,6 +50,10 @@ export default function DecadeChart({ scores, alerts, height = 240 }: DecadeChar
   }));
 
   return (
+    <figure aria-label="Biểu đồ điểm số 10 năm">
+      <figcaption className="sr-only">
+        Biểu đồ đường thể hiện điểm Dương, Âm, Trung bình theo từng năm trong thập kỷ.
+      </figcaption>
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={CHART_DEFAULTS.margin}>
         <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
@@ -115,5 +119,6 @@ export default function DecadeChart({ scores, alerts, height = 240 }: DecadeChar
         />
       </LineChart>
     </ResponsiveContainer>
+    </figure>
   );
 }

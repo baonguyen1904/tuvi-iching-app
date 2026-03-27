@@ -43,7 +43,7 @@ export default function StepIndicator({ step }: Props) {
   const resolvedStep = step === 'completed' ? 'completed' : step;
 
   return (
-    <div className="flex flex-col gap-3 max-w-[280px] mx-auto">
+    <ol role="list" aria-label="Các bước xử lý" className="flex flex-col gap-3 max-w-[280px] mx-auto">
       {STEPS.map((label, i) => {
         const status =
           resolvedStep === 'completed'
@@ -51,7 +51,7 @@ export default function StepIndicator({ step }: Props) {
             : getStepStatus(i, resolvedStep);
 
         return (
-          <div key={i} className="flex items-center gap-3">
+          <li key={i} className="flex items-center gap-3" aria-current={status === 'in-progress' ? 'step' : undefined}>
             {/* Status icon */}
             <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
               {status === 'completed' ? (
@@ -73,9 +73,9 @@ export default function StepIndicator({ step }: Props) {
             >
               {label}
             </span>
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 }

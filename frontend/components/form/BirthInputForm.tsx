@@ -181,10 +181,10 @@ export default function BirthInputForm() {
         </div>
 
         {/* Gender field */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-[13px] font-medium text-text-primary">
+        <fieldset className="flex flex-col gap-1.5">
+          <legend className="text-[13px] font-medium text-text-primary mb-1.5">
             Giới tính <span className="text-accent">*</span>
-          </label>
+          </legend>
 
           <RadioGroup
             value={formState.gender || undefined}
@@ -212,7 +212,7 @@ export default function BirthInputForm() {
               {errors.gender}
             </p>
           )}
-        </div>
+        </fieldset>
 
         {/* Submit error */}
         {errors.submit && (

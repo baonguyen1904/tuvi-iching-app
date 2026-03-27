@@ -28,6 +28,10 @@ export default function OverviewBarChart({ dimensions }: OverviewBarChartProps) 
   const chartHeight = Math.max(280, barData.length * 40 + 32);
 
   return (
+    <figure aria-label="Biểu đồ tổng quan 8 lĩnh vực">
+      <figcaption className="sr-only">
+        Biểu đồ cột ngang thể hiện điểm số 8 lĩnh vực: Sự nghiệp, Tiền bạc, Hôn nhân, Sức khỏe, Đất đai, Học tập, Con cái, Vận mệnh.
+      </figcaption>
     <ResponsiveContainer width="100%" height={chartHeight}>
       <BarChart
         data={barData}
@@ -61,5 +65,6 @@ export default function OverviewBarChart({ dimensions }: OverviewBarChartProps) 
         <Bar dataKey="score" fill="#2563EB" radius={[0, 4, 4, 0]} barSize={16} />
       </BarChart>
     </ResponsiveContainer>
+    </figure>
   );
 }

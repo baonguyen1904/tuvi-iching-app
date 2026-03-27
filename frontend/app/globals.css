@@ -100,6 +100,14 @@ body { background-color: #FAFAFA; color: #111827; }
 }
 .animate-pulse-dot { animation: pulse-dot 1.2s ease-in-out infinite; }
 
+/* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
-  .animate-pulse-dot, .animate-spin, .animate-pulse, .animate-bounce { animation: none; opacity: 1; transform: none; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

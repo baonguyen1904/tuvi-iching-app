@@ -13,7 +13,7 @@ export default function DimensionNavigation({ profileId, currentKey }: Props) {
   const nextKey = currentIndex < DIMENSION_ORDER.length - 1 ? DIMENSION_ORDER[currentIndex + 1] : null;
 
   return (
-    <nav className="mt-10 border-t border-border pt-6 pb-4">
+    <nav aria-label="Điều hướng giữa các lĩnh vực" className="mt-10 border-t border-border pt-6 pb-4">
       <div className="flex justify-between items-center gap-4 max-w-3xl mx-auto">
         {/* Prev */}
         <div className="flex-1">
@@ -21,8 +21,9 @@ export default function DimensionNavigation({ profileId, currentKey }: Props) {
             <Link
               href={`/result/${profileId}/${prevKey}`}
               className="flex items-center gap-2 text-body text-text-secondary hover:text-text-primary transition-colors"
+              aria-label={`Lĩnh vực trước: ${DIMENSION_LABELS[prevKey]}`}
             >
-              <ChevronLeft className="w-4 h-4 flex-shrink-0" />
+              <ChevronLeft className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
               <div>
                 <p className="text-caption text-text-tertiary">Trước</p>
                 <p className="text-body-sm font-medium text-text-primary">
@@ -41,6 +42,7 @@ export default function DimensionNavigation({ profileId, currentKey }: Props) {
             <Link
               href={`/result/${profileId}/${nextKey}`}
               className="flex items-center gap-2 text-body text-text-secondary hover:text-text-primary transition-colors text-right"
+              aria-label={`Lĩnh vực tiếp theo: ${DIMENSION_LABELS[nextKey]}`}
             >
               <div>
                 <p className="text-caption text-text-tertiary">Tiếp theo</p>
@@ -48,7 +50,7 @@ export default function DimensionNavigation({ profileId, currentKey }: Props) {
                   {DIMENSION_LABELS[nextKey]}
                 </p>
               </div>
-              <ChevronRight className="w-4 h-4 flex-shrink-0" />
+              <ChevronRight className="w-4 h-4 flex-shrink-0" aria-hidden="true" />
             </Link>
           ) : (
             <div />

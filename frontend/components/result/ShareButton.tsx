@@ -31,8 +31,9 @@ export default function ShareButton() {
     <button
       onClick={handleShare}
       className="flex items-center gap-2 text-body text-text-secondary hover:text-text-primary transition-colors px-2 py-1 rounded"
+      aria-label="Sao chép liên kết để chia sẻ kết quả"
     >
-      <Share2 className="w-4 h-4" />
+      <Share2 className="w-4 h-4" aria-hidden="true" />
       <span>Chia sẻ</span>
     </button>
   );

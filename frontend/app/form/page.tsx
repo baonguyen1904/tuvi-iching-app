@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function FormPage() {
   return (
-    <div className="min-h-screen bg-bg-primary">
+    <div id="main-content" className="min-h-screen bg-bg-primary">
       {/* Fixed header */}
       <header className="fixed top-0 left-0 right-0 h-14 z-10
         bg-bg-surface border-b border-border flex items-center px-4">

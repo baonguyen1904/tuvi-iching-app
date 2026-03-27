@@ -30,6 +30,10 @@ export default function OverviewRadarChart({ dimensions, height = 280 }: Overvie
   }));
 
   return (
+    <figure aria-label="Biểu đồ tổng quan 8 lĩnh vực">
+      <figcaption className="sr-only">
+        Biểu đồ radar thể hiện điểm số 8 lĩnh vực: Sự nghiệp, Tiền bạc, Hôn nhân, Sức khỏe, Đất đai, Học tập, Con cái, Vận mệnh.
+      </figcaption>
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart cx="50%" cy="50%" outerRadius="75%" data={radarData}>
         <PolarGrid stroke="#E5E7EB" />
@@ -65,5 +69,6 @@ export default function OverviewRadarChart({ dimensions, height = 280 }: Overvie
         />
       </RadarChart>
     </ResponsiveContainer>
+    </figure>
   );
 }

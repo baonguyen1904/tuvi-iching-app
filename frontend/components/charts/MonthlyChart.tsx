@@ -55,6 +55,10 @@ export default function MonthlyChart({ scores, alerts, height = 240 }: MonthlyCh
 
   return (
     <div>
+      <figure aria-label="Biểu đồ điểm số theo tháng">
+        <figcaption className="sr-only">
+          Biểu đồ cột thể hiện điểm Dương, Âm, Trung bình theo từng tháng trong năm.
+        </figcaption>
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={chartData} margin={CHART_DEFAULTS.margin}>
           <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
@@ -120,6 +124,7 @@ export default function MonthlyChart({ scores, alerts, height = 240 }: MonthlyCh
           />
         </LineChart>
       </ResponsiveContainer>
+      </figure>
 
       <p className="text-caption text-text-tertiary mt-2">
         * Tháng 1 được hiển thị hai lần do cách tính của hệ thống.

@@ -85,7 +85,7 @@ export default function ProcessingScreen({ profileId }: Props) {
   const step = currentStatus?.step ?? 'scraping_cohoc';
 
   return (
-    <div className="bg-bg-primary min-h-screen flex flex-col items-center justify-center px-4 py-16">
+    <div id="main-content" className="bg-bg-primary min-h-screen flex flex-col items-center justify-center px-4 py-16">
       <div className="max-w-[400px] w-full text-center">
         {/* Pulsing animation */}
         <div className="flex gap-2 justify-center mb-10">

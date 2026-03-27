@@ -42,7 +42,7 @@ export default async function DimensionDetailPage({
     <div className="bg-bg-primary min-h-screen">
       <DetailHeader profileId={profile.profileId} />
 
-      <main className="max-w-3xl mx-auto px-4 pb-8">
+      <main id="main-content" className="max-w-3xl mx-auto px-4 pb-8">
         <DimensionTitleBlock
           dimensionKey={dimensionKey}
           dimensionData={dimensionData}

@@ -57,6 +57,10 @@ export default function LifetimeChart({ scores, alerts, height = 240 }: Lifetime
   }));
 
   return (
+    <figure aria-label="Biểu đồ điểm số trọn đời">
+      <figcaption className="sr-only">
+        Biểu đồ đường thể hiện điểm Dương, Âm, Trung bình theo độ tuổi.
+      </figcaption>
     <ResponsiveContainer width="100%" height={height}>
       <LineChart data={chartData} margin={CHART_DEFAULTS.margin}>
         <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
@@ -123,5 +127,6 @@ export default function LifetimeChart({ scores, alerts, height = 240 }: Lifetime
         />
       </LineChart>
     </ResponsiveContainer>
+    </figure>
   );
 }

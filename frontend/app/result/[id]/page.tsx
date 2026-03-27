@@ -30,7 +30,7 @@ export default async function ResultPage({
     <div className="bg-bg-primary min-h-screen">
       <ResultHeader profileId={profile.profileId} />
 
-      <main className="max-w-3xl mx-auto px-4 mt-[56px] pb-8">
+      <main id="main-content" className="max-w-3xl mx-auto px-4 mt-[56px] pb-8">
         <ProfileHeaderCard profile={profile} />
         <OverviewChartCard dimensions={profile.dimensions} />
         <AIOverviewCard summary={profile.overview?.summary ?? null} />
