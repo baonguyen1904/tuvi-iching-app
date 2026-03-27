@@ -6,7 +6,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from slugify import slugify
 
-from app.constants import DIMENSIONS
+from app.constants import DIMENSIONS, HOUSE_WEIGHTS
 from app.models.schemas import (
     StarRow,
     ScorePoint,
@@ -149,3 +149,30 @@ class ScoringEngine:
             result[cung.name.lower()] = (raw_pos, raw_neg)
 
         return result
+
+    def _calc_anchor(
+        self,
+        lifetime_raws: dict[str, tuple[float, float]],
+        dim: str,
+        than_cu: str,
+    ) -> tuple[float, float]:
+        """Calculate house weighting anchor from lifetime raw scores.
+
+        Args:
+            lifetime_raws: Dict from _build_raw_scores (cung_name_lower -> (pos, neg)).
+            dim: Dimension key.
+            than_cu: Which cung "Than" resides in (e.g., "Quan Loc").
+
+        Returns:
+            (anchor_pos, anchor_neg) tuple.
+        """
+        anchor_pos = 0.0
+        anchor_neg = 0.0
+
+        for cung_name, house_weight in HOUSE_WEIGHTS[dim]:
+            resolved = than_cu.lower() if cung_name == "thân" else cung_name
+            raw_pos, raw_neg = lifetime_raws.get(resolved, (0.0, 0.0))
+            anchor_pos += raw_pos * house_weight
+            anchor_neg += raw_neg * house_weight
+
+        return anchor_pos, anchor_neg
