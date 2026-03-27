@@ -118,6 +118,42 @@ def format_alerts(alerts: list[Alert]) -> str:
     return "\n".join(lines)
 
 
+# --- Output Validation ---
+
+FORBIDDEN_PHRASES = [
+    "sẽ gặp họa",
+    "chắc chắn sẽ",
+    "tuyệt đối",
+]
+
+
+def validate_output(text: str, dimension: str) -> list[str]:
+    """Validate AI output. Returns list of warnings (empty = pass)."""
+    warnings = []
+
+    # Check forbidden phrases
+    for phrase in FORBIDDEN_PHRASES:
+        if phrase in text:
+            warnings.append(f"TONE: Contains forbidden phrase '{phrase}'")
+
+    # Check disclaimer
+    stripped = text.strip()
+    if not stripped.endswith("*"):
+        warnings.append("MISSING: No disclaimer at end (should end with italic *tham khảo* text)")
+
+    # Check length
+    if len(text) < 200:
+        warnings.append(f"SHORT: Output under 200 chars ({len(text)} chars)")
+    if len(text) > 5000:
+        warnings.append(f"LONG: Output over 5000 chars ({len(text)} chars)")
+
+    # Check for ## headings
+    if "## " not in text:
+        warnings.append("STRUCTURE: No ## headings found in output")
+
+    return warnings
+
+
 # --- Dimension → Primary Cung Mapping ---
 
 DIMENSION_PRIMARY_CUNGS: dict[str, list[str]] = {
@@ -205,6 +241,12 @@ class AIEngine:
             "Generated %s: %d input tokens, %d output tokens",
             dimension, input_tokens, output_tokens,
         )
+
+        # Validate output (log warnings, don't block)
+        warnings = validate_output(text, dimension)
+        for w in warnings:
+            logger.warning("Validation [%s]: %s", dimension, w)
+
         return text
 
     async def generate_overview(
