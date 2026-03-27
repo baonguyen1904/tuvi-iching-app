@@ -178,3 +178,69 @@ def test_decade_periods_are_years(result):
         assert p.isdigit(), f"Decade period '{p}' is not a year"
     years = [int(p) for p in periods]
     assert years == list(range(years[0], years[0] + 10))
+
+
+def test_scoring_error_on_insufficient_cungs(engine):
+    """Raise ScoringError if fewer than 12 lifetime cungs."""
+    from app.services.scoring import ScoringError
+
+    bad_laso = FixtureLasoData(
+        nam="Test", menh="Moc", cuc="Test", than_cu="Menh",
+        menh_chu="Test", than_chu="Test", am_duong="Test",
+        cung=[FixtureCung(name="Menh", stars=[])],  # only 1
+        cung_10yrs=[FixtureCung(name=f"C{i}", stars=[]) for i in range(12)],
+        cung_12months=[
+            FixtureMonthlyCung(name=f"C{i}", month=i+1, month_label=f"Th.{i+1}", stars=[])
+            for i in range(12)
+        ],
+    )
+    with pytest.raises(ScoringError, match="12 lifetime"):
+        engine.score(bad_laso)
+
+
+def test_scoring_error_on_insufficient_months(engine):
+    """Raise ScoringError if fewer than 12 monthly cungs."""
+    from app.services.scoring import ScoringError
+
+    bad_laso = FixtureLasoData(
+        nam="Test", menh="Moc", cuc="Test", than_cu="Menh",
+        menh_chu="Test", than_chu="Test", am_duong="Test",
+        cung=[FixtureCung(name=f"C{i}", stars=[]) for i in range(12)],
+        cung_10yrs=[FixtureCung(name=f"C{i}", stars=[]) for i in range(12)],
+        cung_12months=[
+            FixtureMonthlyCung(name="C0", month=1, month_label="Th.1", stars=[])
+        ],  # only 1
+    )
+    with pytest.raises(ScoringError, match="12 monthly"):
+        engine.score(bad_laso)
+
+
+def test_scoring_with_empty_stars_produces_zero_scores(engine):
+    """All cungs with no stars -> all scores should be 0."""
+    empty_laso = FixtureLasoData(
+        nam="Test", menh="Moc", cuc="Test", than_cu="Menh",
+        menh_chu="Test", than_chu="Test", am_duong="Test",
+        cung=[FixtureCung(name=f"C{i}", stars=[]) for i in range(12)],
+        cung_10yrs=[FixtureCung(name=f"C{i}", stars=[]) for i in range(12)],
+        cung_12months=[
+            FixtureMonthlyCung(name=f"C{i}", month=i+1, month_label=f"Th.{i+1}", stars=[])
+            for i in range(12)
+        ],
+    )
+    result = engine.score(empty_laso)
+
+    for dim_key, dim_scores in result.dimensions.items():
+        for point in dim_scores.lifetime:
+            assert point.duong == 0.0
+            assert point.am == 0.0
+            assert point.tb == 0.0
+
+
+def test_scoring_performance(engine, laso):
+    """Scoring must complete in < 200ms."""
+    import time
+    start = time.perf_counter()
+    for _ in range(10):
+        engine.score(laso)
+    elapsed = (time.perf_counter() - start) / 10
+    assert elapsed < 0.2, f"Scoring took {elapsed:.3f}s, expected < 0.2s"
