@@ -222,6 +222,50 @@ class AIEngine:
         )
         return text
 
+    async def generate_all(
+        self,
+        user: UserProfile,
+        metadata: LasoMetadata,
+        laso: dict,
+        scoring: ScoringResult,
+        progress_callback=None,
+    ) -> InterpretationResult:
+        """Generate overview + 7 dimensions concurrently. Main entry point."""
+        DIMS = ["su_nghiep", "tien_bac", "hon_nhan", "suc_khoe", "dat_dai", "hoc_tap", "con_cai"]
+
+        # Build task dict: key → coroutine
+        task_keys = ["overview"] + DIMS
+        coros = [self.generate_overview(user, metadata, scoring)]
+        for dim in DIMS:
+            coros.append(
+                self.generate_dimension(dim, user, metadata, laso, scoring.dimensions[dim])
+            )
+
+        results = await asyncio.gather(*coros, return_exceptions=True)
+
+        interpretation = InterpretationResult(
+            overview="",
+            dimensions={},
+            errors={},
+            token_usage={},
+        )
+
+        completed = 0
+        for key, result in zip(task_keys, results):
+            completed += 1
+            if isinstance(result, Exception):
+                interpretation.errors[key] = f"{type(result).__name__}: {str(result)}"
+                logger.error("Failed to generate %s: %s", key, result)
+            elif key == "overview":
+                interpretation.overview = result
+            else:
+                interpretation.dimensions[key] = result
+
+            if progress_callback:
+                await progress_callback(completed, 8)
+
+        return interpretation
+
     def _get_stars_in_cungs(self, laso: dict, cung_names: list[str]) -> list[str]:
         """Get star names from laso data for given cung names."""
         stars = []

@@ -1,4 +1,5 @@
 """Tests for AIEngine API calling with mocked Claude API."""
+import asyncio
 import json
 from datetime import date
 from pathlib import Path
@@ -181,3 +182,89 @@ async def test_generate_overview_returns_text(engine, user, metadata, scoring):
 
     assert "Tổng quan" in result
     assert isinstance(result, str)
+
+
+# --- generate_all tests ---
+
+
+@pytest.mark.asyncio
+async def test_generate_all_returns_7_dimensions_and_overview(engine, user, metadata, scoring, laso):
+    """All 8 calls succeed."""
+    mock_resp = _mock_response("## Tổng quan\nMock luận giải.\n\n---\n*Tham khảo.*")
+
+    with patch.object(
+        engine._client.messages, "create",
+        new_callable=AsyncMock, return_value=mock_resp,
+    ):
+        result = await engine.generate_all(user, metadata, laso, scoring)
+
+    assert len(result.dimensions) == 7
+    assert result.overview is not None
+    assert result.has_errors is False
+
+
+@pytest.mark.asyncio
+async def test_generate_all_partial_failure(engine, user, metadata, scoring, laso):
+    """1 dimension fails, 6 + overview succeed."""
+    call_count = 0
+
+    async def mock_create(**kwargs):
+        nonlocal call_count
+        call_count += 1
+        # Fail the second call (first dimension after overview)
+        if call_count == 2:
+            raise RuntimeError("Simulated failure")
+        return _mock_response("## Tổng quan\nMock.\n\n---\n*Tham khảo.*")
+
+    with patch.object(
+        engine._client.messages, "create",
+        side_effect=mock_create,
+    ):
+        result = await engine.generate_all(user, metadata, laso, scoring)
+
+    assert len(result.dimensions) == 6
+    assert len(result.errors) == 1
+    assert result.has_errors is True
+
+
+@pytest.mark.asyncio
+async def test_generate_all_progress_callback(engine, user, metadata, scoring, laso):
+    """Progress callback called 8 times."""
+    progress_calls = []
+
+    async def on_progress(completed: int, total: int):
+        progress_calls.append((completed, total))
+
+    mock_resp = _mock_response("## Tổng quan\nMock.\n\n---\n*Tham khảo.*")
+
+    with patch.object(
+        engine._client.messages, "create",
+        new_callable=AsyncMock, return_value=mock_resp,
+    ):
+        result = await engine.generate_all(
+            user, metadata, laso, scoring, progress_callback=on_progress
+        )
+
+    assert len(progress_calls) == 8
+    assert progress_calls[-1] == (8, 8)
+
+
+@pytest.mark.asyncio
+async def test_generate_all_concurrent_execution(engine, user, metadata, scoring, laso):
+    """Verify calls run concurrently (total time < sum of individual times)."""
+    import time
+
+    async def slow_create(**kwargs):
+        await asyncio.sleep(0.1)  # 100ms per call
+        return _mock_response("Mock")
+
+    with patch.object(
+        engine._client.messages, "create",
+        side_effect=slow_create,
+    ):
+        start = time.monotonic()
+        result = await engine.generate_all(user, metadata, laso, scoring)
+        elapsed = time.monotonic() - start
+
+    # 8 calls x 0.1s = 0.8s sequential. Concurrent should be ~0.1s
+    assert elapsed < 0.5, f"Took {elapsed:.2f}s — not concurrent enough"
