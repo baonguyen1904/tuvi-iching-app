@@ -6,7 +6,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from slugify import slugify
 
-from app.constants import DIMENSIONS, HOUSE_WEIGHTS
+from app.constants import DIMENSIONS, HOUSE_WEIGHTS, SUMMARY_AGE_WEIGHTS
 from app.models.schemas import (
     StarRow,
     ScorePoint,
@@ -176,3 +176,58 @@ class ScoringEngine:
             anchor_neg += raw_neg * house_weight
 
         return anchor_pos, anchor_neg
+
+    def _calc_final(
+        self,
+        raws: dict[str, tuple[float, float]],
+        anchor: tuple[float, float],
+        periods: list[str],
+        cung_order: list[str],
+    ) -> list[ScorePoint]:
+        """Calculate final scores for a list of cungs.
+
+        Args:
+            raws: cung_name_lower -> (raw_pos, raw_neg).
+            anchor: (anchor_pos, anchor_neg) from _calc_anchor.
+            periods: X-axis labels in order.
+            cung_order: Cung names (lowered) matching periods order.
+
+        Returns:
+            List of ScorePoint, one per period.
+        """
+        anchor_pos, anchor_neg = anchor
+        points: list[ScorePoint] = []
+
+        for period, cung_name in zip(periods, cung_order):
+            raw_pos, raw_neg = raws.get(cung_name, (0.0, 0.0))
+            final_pos = (raw_pos + anchor_pos) / 2
+            final_neg = (raw_neg + anchor_neg) / 2
+            final_tb = final_pos + final_neg
+
+            points.append(ScorePoint(
+                period=str(period),
+                duong=round(final_pos, 2),
+                am=round(final_neg, 2),
+                tb=round(final_tb, 2),
+            ))
+
+        return points
+
+    def _summary_score(self, lifetime_points: list[ScorePoint]) -> float:
+        """Weighted average of lifetime tb values using SUMMARY_AGE_WEIGHTS."""
+        ages = list(range(0, 120, 10))
+        if len(lifetime_points) != len(ages):
+            logger.error(
+                "Expected %d lifetime points, got %d", len(ages), len(lifetime_points)
+            )
+            return 0.0
+
+        weighted_sum = 0.0
+        weight_total = 0.0
+
+        for point, age in zip(lifetime_points, ages):
+            w = SUMMARY_AGE_WEIGHTS.get(age, 1.0)
+            weighted_sum += point.tb * w
+            weight_total += w
+
+        return round(weighted_sum / weight_total, 2) if weight_total > 0 else 0.0
