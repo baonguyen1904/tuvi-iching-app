@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from datetime import date
 from typing import Optional
 
 from pydantic import BaseModel
@@ -90,3 +91,50 @@ class ScoringResult:
     """Complete scoring output for all dimensions."""
     dimensions: dict[str, DimensionScores] = field(default_factory=dict)
     all_alerts: list[Alert] = field(default_factory=list)
+
+
+# --- AI pipeline types ---
+
+
+@dataclass
+class UserProfile:
+    """User profile data for AI prompt building."""
+    name: str | None
+    birth_date: date
+    birth_hour: str
+    birth_hour_label: str
+    gender: str
+    gender_label: str
+    current_age: int
+    nam_xem: int
+
+    @property
+    def display_name(self) -> str:
+        return self.name if self.name else "Bạn"
+
+
+@dataclass
+class LasoMetadata:
+    """Lá số metadata extracted from scraper output."""
+    nam: str          # "Giáp Tuất"
+    menh: str         # "Mộc"
+    cuc: str          # "Thủy Nhị Cục"
+    am_duong: str     # "Dương Nam"
+    cung_menh: str    # Cung name where Mệnh resides
+
+
+@dataclass
+class InterpretationResult:
+    """Complete AI interpretation output."""
+    overview: str
+    dimensions: dict[str, str] = field(default_factory=dict)
+    errors: dict[str, str] = field(default_factory=dict)
+    token_usage: dict[str, tuple[int, int]] = field(default_factory=dict)
+
+    @property
+    def has_errors(self) -> bool:
+        return len(self.errors) > 0
+
+    @property
+    def completed_count(self) -> int:
+        return len(self.dimensions)
