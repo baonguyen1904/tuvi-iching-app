@@ -3,6 +3,8 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from app.models.schemas import ScorePoint, Alert
+
 
 # --- Knowledge Base ---
 
@@ -65,3 +67,30 @@ def load_kb(kb_dir: str) -> KnowledgeBase:
     kb.examples = _load_md_files(examples_dir)
 
     return kb
+
+
+# --- Score & Alert Formatting ---
+
+
+def format_scores_table(points: list[ScorePoint], header: str = "Giai đoạn") -> str:
+    """Format score points as markdown table."""
+    lines = [
+        f"| {header} | Dương | Âm | TB |",
+        f"|{'---' * len(header)}|-------|-----|-----|",
+    ]
+    for p in points:
+        lines.append(f"| {p.period} | {p.duong:.2f} | {p.am:.2f} | {p.tb:.2f} |")
+    return "\n".join(lines)
+
+
+def format_alerts(alerts: list[Alert]) -> str:
+    """Format alerts as readable text with 🔺🔻 markers, sorted by level desc."""
+    if not alerts:
+        return "Không có cảnh báo đặc biệt."
+
+    sorted_alerts = sorted(alerts, key=lambda a: a.level, reverse=True)
+    lines = []
+    for a in sorted_alerts:
+        icon = "🔺" if a.type == "positive" else "🔻"
+        lines.append(f"{icon} {a.period} (Level {a.level}): {a.tag} [sao: {a.star_name}]")
+    return "\n".join(lines)
