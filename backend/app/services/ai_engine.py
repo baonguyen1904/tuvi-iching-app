@@ -1,12 +1,30 @@
 """AI Luận Giải Engine — KB loading, prompt building, Claude API orchestration."""
 
+import asyncio
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+
+import anthropic
 
 from app.constants import DIMENSION_LABELS, HOUSE_WEIGHTS
 from app.models.schemas import (
     ScorePoint, Alert, DimensionScores, ScoringResult,
     UserProfile, LasoMetadata, InterpretationResult,
+)
+
+logger = logging.getLogger(__name__)
+
+# --- API Configuration ---
+
+MAX_RETRIES = 3
+RETRY_DELAYS = [2, 5, 10]  # seconds
+TIMEOUT_PER_CALL = 60
+
+RETRYABLE_ERRORS = (
+    anthropic.RateLimitError,
+    anthropic.APIConnectionError,
+    anthropic.InternalServerError,
 )
 
 
@@ -143,6 +161,66 @@ class AIEngine:
     def __init__(self, kb_dir: str, api_key: str):
         self._kb: KnowledgeBase = load_kb(kb_dir)
         self._api_key = api_key
+        self._client = anthropic.AsyncAnthropic(api_key=api_key)
+
+    async def _call_claude(self, system: str, user_msg: str) -> tuple[str, int, int]:
+        """Call Claude API with retry logic. Returns (text, input_tokens, output_tokens)."""
+        for attempt in range(MAX_RETRIES):
+            try:
+                response = await self._client.messages.create(
+                    model="claude-sonnet-4-20250514",
+                    max_tokens=2000,
+                    temperature=0.7,
+                    system=system,
+                    messages=[{"role": "user", "content": user_msg}],
+                )
+                text = response.content[0].text
+                return text, response.usage.input_tokens, response.usage.output_tokens
+            except RETRYABLE_ERRORS as e:
+                if attempt == MAX_RETRIES - 1:
+                    raise
+                delay = RETRY_DELAYS[attempt]
+                logger.warning(
+                    "Claude API error (attempt %d/%d): %s. Retrying in %ds...",
+                    attempt + 1, MAX_RETRIES, e, delay,
+                )
+                await asyncio.sleep(delay)
+        # Should not reach here
+        raise RuntimeError("Unexpected: exhausted retries without raising")
+
+    async def generate_dimension(
+        self,
+        dimension: str,
+        user: UserProfile,
+        metadata: LasoMetadata,
+        laso: dict,
+        dim_scores: DimensionScores,
+    ) -> str:
+        """Generate luận giải for a single dimension."""
+        system, user_msg = self._build_dimension_prompt(
+            dimension, user, metadata, laso, dim_scores
+        )
+        text, input_tokens, output_tokens = await self._call_claude(system, user_msg)
+        logger.info(
+            "Generated %s: %d input tokens, %d output tokens",
+            dimension, input_tokens, output_tokens,
+        )
+        return text
+
+    async def generate_overview(
+        self,
+        user: UserProfile,
+        metadata: LasoMetadata,
+        scoring: ScoringResult,
+    ) -> str:
+        """Generate overview summary across all dimensions."""
+        system, user_msg = self._build_overview_prompt(user, metadata, scoring)
+        text, input_tokens, output_tokens = await self._call_claude(system, user_msg)
+        logger.info(
+            "Generated overview: %d input tokens, %d output tokens",
+            input_tokens, output_tokens,
+        )
+        return text
 
     def _get_stars_in_cungs(self, laso: dict, cung_names: list[str]) -> list[str]:
         """Get star names from laso data for given cung names."""
