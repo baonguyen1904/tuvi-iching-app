@@ -3,8 +3,11 @@
 
 **Priority:** Must — blocks AI pipeline
 **Estimated effort:** 3-4 days
-**Dependencies:** Task 01 (LasoData), `laso_points.xlsx`
+**Dependencies:** Task 01 (LasoData), `data/laso_points.xlsx`
 **Output:** `services/scoring.py`
+**Spec file** `docs/superpowers/specs/2026-03-27-scoring-engine-design.md`
+**Plan file** `docs/superpowers/plans/2026-03-27-scoring-engine-implementation.md`
+**Claude code session** = `798791e5-efda-4cb0-93e9-be1da4acaf94`
 
 ---
 
@@ -113,24 +116,21 @@ anchor_pos = (
 
 ### hoc_tap (Học Tập)
 ```python
-# NEED TO VERIFY — extract from existing code's hoc_tap_all() function
-# Likely:
 anchor_pos = (
-    raw_pos("relevant_cung_1") * weight_1
-    + raw_pos("relevant_cung_2") * weight_2
+    raw_pos("mệnh") * 0.5
+    + raw_pos("quan lộc") * 0.2
+    + raw_pos("thiên di") * 0.3
 )
 ```
-⚠️ **ACTION:** Check `hoc_tap_all()` in export_report.py for exact anchor cungs.
 
 ### con_cai (Con Cái)
 ```python
-# NEED TO VERIFY — extract from existing code's con_cai_all() function
 anchor_pos = (
-    raw_pos("tử tức") * weight_1
-    + raw_pos("relevant_cung") * weight_2
+    raw_pos("tử tức") * 0.5
+    + raw_pos("điền trạch") * 0.1
+    + raw_pos("phúc đức") * 0.4
 )
 ```
-⚠️ **ACTION:** Check `con_cai_all()` in export_report.py for exact anchor cungs.
 
 ---
 
@@ -348,8 +348,8 @@ HOUSE_WEIGHTS = {
     'hon_nhan': [("phu thê", 0.4), ("mệnh", 0.2), ("phúc đức", 0.2), ("nô bộc", 0.2)],
     'suc_khoe': [("tật ách", 0.6), ("phúc đức", 0.4)],
     'dat_dai': [("tật ách", 0.6), ("phúc đức", 0.4)],  # same as suc_khoe (intentional)
-    'hoc_tap': [],  # TODO: extract from hoc_tap_all()
-    'con_cai': [],  # TODO: extract from con_cai_all()
+    'hoc_tap': [("mệnh", 0.5), ("quan lộc", 0.2), ("thiên di", 0.3)],
+    'con_cai': [("tử tức", 0.5), ("điền trạch", 0.1), ("phúc đức", 0.4)],
 }
 
 class ScoringEngine:
@@ -614,13 +614,11 @@ def test_scoring_accuracy():
 
 ---
 
-## REMAINING UNKNOWNS
+## REMAINING UNKNOWNS -- ALL RESOLVED
 
-| # | What | Action |
-|---|------|--------|
-| 1 | hoc_tap anchor cungs + weights | Extract from `hoc_tap_all()` in export_report.py |
-| 2 | con_cai anchor cungs + weights | Extract from `con_cai_all()` in export_report.py |
-| 3 | "thân" cung mapping | `than_cu` field from CohocData tells which cung = Thân |
-| 4 | Cung name for "nô bộc" | May appear as "Nô Bộc" or "Giao Hữu" in scraper output |
-
-**Ask founder:** Can you run Claude Code again on the codebase to extract the exact `hoc_tap_all()` and `con_cai_all()` functions? Or share those specific functions.
+| # | What | Resolution |
+|---|------|------------|
+| 1 | hoc_tap anchor cungs | ("menh", 0.5), ("quan loc", 0.2), ("thien di", 0.3) |
+| 2 | con_cai anchor cungs | ("tu tuc", 0.5), ("dien trach", 0.1), ("phuc duc", 0.4) |
+| 3 | "than" cung mapping | Dynamic: `laso.than_cu` resolves at runtime |
+| 4 | Cung name for "no boc" | Use "no boc" (scraper strips to this form) |
