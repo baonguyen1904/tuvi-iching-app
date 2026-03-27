@@ -1,4 +1,17 @@
-"""AI Luận Giải Engine — KB loading, prompt building, Claude API orchestration."""
+"""AI Luận Giải Engine — KB loading, prompt building, Claude API orchestration.
+
+Integration with FastAPI:
+
+In main.py lifespan:
+    engine = AIEngine(kb_dir="knowledge_base", api_key=os.environ["ANTHROPIC_API_KEY"])
+    app.state.ai_engine = engine
+
+In router:
+    engine = request.app.state.ai_engine
+    result = await engine.generate_all(user, metadata, laso, scoring, progress_callback)
+    # Store result in SQLite
+    # Update profile status to "completed"
+"""
 
 import asyncio
 import logging
