@@ -168,3 +168,28 @@ def test_dimension_prompt_different_dimensions_have_different_kb(engine, user, m
         "tien_bac", user, metadata, laso, scoring.dimensions["tien_bac"]
     )
     assert sys_sn != sys_tb
+
+
+# --- Overview Prompt Tests ---
+
+def test_overview_prompt_has_all_dimension_summaries(engine, user, metadata, scoring):
+    system, user_msg = engine._build_overview_prompt(user, metadata, scoring)
+    assert "Sự Nghiệp" in user_msg
+    assert "Tiền Bạc" in user_msg
+    assert "Hôn Nhân" in user_msg
+    assert "Sức Khỏe" in user_msg
+    assert "Đất Đai" in user_msg
+    assert "Học Tập" in user_msg
+    assert "Con Cái" in user_msg
+
+
+def test_overview_prompt_no_dimension_kb(engine, user, metadata, scoring):
+    system, _ = engine._build_overview_prompt(user, metadata, scoring)
+    # System should have core KB but NOT dimension-specific content
+    assert "Quan Lộc" not in system
+
+
+def test_overview_prompt_output_format(engine, user, metadata, scoring):
+    _, user_msg = engine._build_overview_prompt(user, metadata, scoring)
+    assert "3-5 câu" in user_msg
+    assert "tổng quan" in user_msg.lower()

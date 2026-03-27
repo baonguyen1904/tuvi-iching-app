@@ -296,3 +296,75 @@ class AIEngine:
 
         user_msg = "\n\n".join(user_parts)
         return system, user_msg
+
+    def _build_overview_prompt(
+        self,
+        user: UserProfile,
+        metadata: LasoMetadata,
+        scoring: ScoringResult,
+    ) -> tuple[str, str]:
+        """Build (system_message, user_message) for overview prompt."""
+        # --- System message (core KB + tone, no dimension KB, no stars) ---
+        system_parts = [
+            "[ROLE DEFINITION]\n"
+            "Bạn là tư vấn viên luận giải tử vi chuyên nghiệp, sử dụng hệ thống "
+            "Chánh Ngã Đồ (Tử Vi Đẩu Số + scoring analytics). Nhiệm vụ: viết tổng "
+            "quan vận mệnh dựa trên data được cung cấp.",
+
+            "[RULES — NON-NEGOTIABLE]\n"
+            "1. Chỉ nói về data được cung cấp — KHÔNG bịa đặt\n"
+            "2. Ngôn ngữ tích cực, empowering — giọng văn \"anh trai khuyên em\"\n"
+            "3. Mỗi cảnh báo 🔻 PHẢI đi kèm lời khuyên cụ thể\n"
+            "4. Dùng \"cần thận trọng\" thay vì \"sẽ gặp họa\"\n"
+            "5. Kết thúc bằng disclaimer\n"
+            "6. Viết tiếng Việt tự nhiên, không quá trang trọng, không thần bí",
+
+            f"[KNOWLEDGE BASE — CORE]\n{self._kb.core['scoring_rules']}\n\n"
+            f"{self._kb.core['alert_interpretation']}",
+
+            f"[KNOWLEDGE BASE — TONE]\n{self._kb.core['tone_guidelines']}",
+        ]
+        system = "\n\n".join(system_parts)
+
+        # --- User message ---
+        dims_to_summarize = [
+            "su_nghiep", "tien_bac", "hon_nhan",
+            "suc_khoe", "dat_dai", "hoc_tap", "con_cai",
+        ]
+
+        dim_summaries = []
+        for dim in dims_to_summarize:
+            if dim not in scoring.dimensions:
+                continue
+            ds = scoring.dimensions[dim]
+            label = DIMENSION_LABELS.get(dim, dim)
+            pos_count = sum(1 for a in ds.alerts if a.type == "positive")
+            neg_count = sum(1 for a in ds.alerts if a.type == "negative")
+            alert_count = len(ds.alerts)
+            dim_summaries.append(
+                f"- {label}: TB trung bình {ds.summary_score:.2f}, "
+                f"{alert_count} cảnh báo ({pos_count} 🔺, {neg_count} 🔻)"
+            )
+
+        user_parts = [
+            f"[USER DATA]\n"
+            f"- Tên: {user.display_name}\n"
+            f"- Sinh: {user.birth_date} ({metadata.nam}), {user.birth_hour_label}, {user.gender_label}\n"
+            f"- Tuổi hiện tại: {user.current_age}\n"
+            f"- Cung Mệnh: {metadata.cung_menh} — Mệnh {metadata.menh}",
+
+            "[ALL DIMENSION SUMMARIES]\n" + "\n".join(dim_summaries),
+
+            "[OUTPUT FORMAT]\n"
+            "Viết tổng quan vận mệnh trong 3-5 câu. Nhận xét bức tranh lớn:\n"
+            "- Xu hướng tổng thể\n"
+            "- Lĩnh vực mạnh nhất\n"
+            "- Lĩnh vực cần chú ý nhất\n"
+            "Ngắn gọn, súc tích, gợi mở để người xem muốn đọc chi tiết từng lĩnh vực.\n\n"
+            "---\n"
+            "*Đây là tổng quan tham khảo dựa trên Tử Vi Đẩu Số. "
+            "Mọi quyết định cuối cùng là của bạn.*",
+        ]
+
+        user_msg = "\n\n".join(user_parts)
+        return system, user_msg
