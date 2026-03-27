@@ -1,0 +1,167 @@
+{
+  "dimensions": {
+    "su_nghiep": {
+      "dimension": "su_nghiep",
+      "label": "Sự Nghiệp",
+      "lifetime": [
+        {"period": "0-10", "duong": 5.20, "am": -3.10, "tb": 2.10},
+        {"period": "10-20", "duong": 8.40, "am": -4.50, "tb": 3.90},
+        {"period": "20-30", "duong": 15.20, "am": -8.30, "tb": 6.90},
+        {"period": "30-40", "duong": 18.40, "am": -5.10, "tb": 13.30},
+        {"period": "40-50", "duong": 16.80, "am": -7.20, "tb": 9.60},
+        {"period": "50-60", "duong": 12.10, "am": -9.40, "tb": 2.70}
+      ],
+      "decade": [
+        {"period": "2024", "duong": 14.50, "am": -6.20, "tb": 8.30},
+        {"period": "2025", "duong": 15.80, "am": -5.90, "tb": 9.90},
+        {"period": "2026", "duong": 12.50, "am": -6.20, "tb": 6.30},
+        {"period": "2027", "duong": 17.20, "am": -4.10, "tb": 13.10},
+        {"period": "2028", "duong": 13.60, "am": -7.50, "tb": 6.10},
+        {"period": "2029", "duong": 10.30, "am": -11.20, "tb": -0.90}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 10.00, "am": -4.50, "tb": 5.50},
+        {"period": "Th.2/2026", "duong": 11.20, "am": -5.10, "tb": 6.10},
+        {"period": "Th.3/2026", "duong": 13.50, "am": -4.80, "tb": 8.70},
+        {"period": "Th.4/2026", "duong": 12.80, "am": -6.30, "tb": 6.50},
+        {"period": "Th.5/2026", "duong": 14.10, "am": -5.20, "tb": 8.90},
+        {"period": "Th.6/2026", "duong": 11.70, "am": -7.10, "tb": 4.60}
+      ],
+      "alerts": [
+        {
+          "type": "positive",
+          "dimension": "su_nghiep",
+          "period": "2027",
+          "tag": "có bước thăng tiến",
+          "level": 50,
+          "star_name": "hoa-cai"
+        },
+        {
+          "type": "negative",
+          "dimension": "su_nghiep",
+          "period": "2029",
+          "tag": "cẩn thận kiện cáo",
+          "level": 30,
+          "star_name": "da-la"
+        }
+      ],
+      "summary_score": 7.45
+    },
+    "tien_bac": {
+      "dimension": "tien_bac",
+      "label": "Tiền Bạc",
+      "lifetime": [
+        {"period": "0-10", "duong": 4.10, "am": -2.80, "tb": 1.30},
+        {"period": "10-20", "duong": 7.20, "am": -5.10, "tb": 2.10},
+        {"period": "20-30", "duong": 12.50, "am": -6.40, "tb": 6.10},
+        {"period": "30-40", "duong": 14.80, "am": -4.20, "tb": 10.60}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 11.30, "am": -5.80, "tb": 5.50}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 9.80, "am": -4.20, "tb": 5.60}
+      ],
+      "alerts": [],
+      "summary_score": 5.20
+    },
+    "hon_nhan": {
+      "dimension": "hon_nhan",
+      "label": "Hôn Nhân",
+      "lifetime": [
+        {"period": "0-10", "duong": 3.50, "am": -2.10, "tb": 1.40},
+        {"period": "20-30", "duong": 10.80, "am": -5.30, "tb": 5.50}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 9.20, "am": -4.80, "tb": 4.40}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 8.50, "am": -3.90, "tb": 4.60}
+      ],
+      "alerts": [],
+      "summary_score": 4.80
+    },
+    "suc_khoe": {
+      "dimension": "suc_khoe",
+      "label": "Sức Khỏe",
+      "lifetime": [
+        {"period": "0-10", "duong": 6.80, "am": -2.50, "tb": 4.30},
+        {"period": "20-30", "duong": 11.20, "am": -4.80, "tb": 6.40}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 10.10, "am": -5.30, "tb": 4.80}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 9.50, "am": -4.70, "tb": 4.80}
+      ],
+      "alerts": [],
+      "summary_score": 5.60
+    },
+    "dat_dai": {
+      "dimension": "dat_dai",
+      "label": "Đất Đai",
+      "lifetime": [
+        {"period": "0-10", "duong": 4.50, "am": -3.20, "tb": 1.30},
+        {"period": "20-30", "duong": 9.80, "am": -5.60, "tb": 4.20}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 8.70, "am": -5.10, "tb": 3.60}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 7.90, "am": -4.50, "tb": 3.40}
+      ],
+      "alerts": [],
+      "summary_score": 3.90
+    },
+    "hoc_tap": {
+      "dimension": "hoc_tap",
+      "label": "Học Tập",
+      "lifetime": [
+        {"period": "0-10", "duong": 7.10, "am": -3.40, "tb": 3.70},
+        {"period": "20-30", "duong": 13.40, "am": -6.10, "tb": 7.30}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 11.80, "am": -5.50, "tb": 6.30}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 10.20, "am": -4.80, "tb": 5.40}
+      ],
+      "alerts": [],
+      "summary_score": 6.10
+    },
+    "con_cai": {
+      "dimension": "con_cai",
+      "label": "Con Cái",
+      "lifetime": [
+        {"period": "0-10", "duong": 5.30, "am": -2.90, "tb": 2.40},
+        {"period": "20-30", "duong": 10.50, "am": -4.70, "tb": 5.80}
+      ],
+      "decade": [
+        {"period": "2026", "duong": 9.40, "am": -4.90, "tb": 4.50}
+      ],
+      "monthly": [
+        {"period": "Th.1/2026", "duong": 8.80, "am": -4.30, "tb": 4.50}
+      ],
+      "alerts": [],
+      "summary_score": 4.50
+    }
+  },
+  "all_alerts": [
+    {
+      "type": "positive",
+      "dimension": "su_nghiep",
+      "period": "2027",
+      "tag": "có bước thăng tiến",
+      "level": 50,
+      "star_name": "hoa-cai"
+    },
+    {
+      "type": "negative",
+      "dimension": "su_nghiep",
+      "period": "2029",
+      "tag": "cẩn thận kiện cáo",
+      "level": 30,
+      "star_name": "da-la"
+    }
+  ]
+}
