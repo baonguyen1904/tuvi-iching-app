@@ -231,3 +231,88 @@ class ScoringEngine:
             weight_total += w
 
         return round(weighted_sum / weight_total, 2) if weight_total > 0 else 0.0
+
+    def _detect_alerts(
+        self,
+        points: list[ScorePoint],
+        cungs: list,
+        dim: str,
+        timeframe: str,
+    ) -> list[Alert]:
+        """Detect score change alerts between consecutive periods.
+
+        Args:
+            points: ScorePoint list (ordered by period).
+            cungs: Matching cung list (same order as points) -- stars used for tag lookup.
+            dim: Dimension key.
+            timeframe: "lifetime", "decade", or "monthly".
+
+        Returns:
+            List of Alert objects.
+        """
+        alerts: list[Alert] = []
+
+        # Determine age cutoff for lifetime charts
+        max_age = None
+        if timeframe == "lifetime":
+            max_age = 60 if dim == "con_cai" else 80
+
+        for col_attr, col_name in [("duong", "pos"), ("am", "neg")]:
+            values = [getattr(p, col_attr) for p in points]
+
+            for i in range(1, len(values)):
+                prev = values[i - 1]
+                curr = values[i]
+
+                # Skip if previous is zero
+                if abs(prev) < 1e-9:
+                    continue
+
+                pct_change = ((curr - prev) / abs(prev)) * 100
+
+                # Skip after age cutoff on lifetime
+                if max_age is not None and timeframe == "lifetime":
+                    try:
+                        age = int(points[i].period.split("-")[0])
+                        if age >= max_age:
+                            continue
+                    except (ValueError, IndexError):
+                        pass
+
+                # Determine alert level
+                abs_pct = abs(pct_change)
+                if abs_pct >= 50:
+                    level = 50
+                elif abs_pct >= 30:
+                    level = 30
+                else:
+                    continue
+
+                direction = "pos" if pct_change > 0 else "neg"
+
+                # Find matching stars in destination cung
+                if i < len(cungs):
+                    for star in cungs[i].stars:
+                        row = self._star_table.get(star.slug)
+                        if row is None:
+                            continue
+
+                        # Check pct_fvg direction match
+                        if row.pct_fvg.get(level) != direction:
+                            continue
+
+                        # Get tag text
+                        tag = row.alert_tags.get(dim, {}).get(level)
+                        if not tag:
+                            continue
+
+                        alerts.append(Alert(
+                            type="positive" if direction == "pos" else "negative",
+                            dimension=dim,
+                            period=points[i].period,
+                            tag=tag,
+                            level=level,
+                            star_name=row.slug,
+                        ))
+
+        return alerts
