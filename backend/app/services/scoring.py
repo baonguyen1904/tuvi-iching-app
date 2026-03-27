@@ -109,3 +109,43 @@ class ScoringEngine:
         wb.close()
         logger.info("Loaded %d stars from %s", len(table), path)
         return table
+
+    def _build_raw_scores(
+        self, cungs: list, dim: str
+    ) -> dict[str, tuple[float, float]]:
+        """Calculate raw pos/neg scores per cung for a dimension.
+
+        Args:
+            cungs: List of Cung (or any object with .name and .stars[].slug).
+            dim: Dimension key (e.g., "su_nghiep").
+
+        Returns:
+            Dict mapping lowered cung name -> (raw_pos, raw_neg).
+        """
+        result: dict[str, tuple[float, float]] = {}
+
+        for cung in cungs:
+            raw_pos = 0.0
+            raw_neg = 0.0
+
+            for star in cung.stars:
+                row = self._star_table.get(star.slug)
+                if row is None:
+                    logger.warning(
+                        "Star not found in table: slug='%s' (cung='%s')",
+                        star.slug,
+                        cung.name,
+                    )
+                    continue
+
+                weight = row.weights.get(dim, 1.0)
+                contribution = row.point * weight
+
+                if row.point > 0:
+                    raw_pos += contribution
+                else:
+                    raw_neg += contribution
+
+            result[cung.name.lower()] = (raw_pos, raw_neg)
+
+        return result
