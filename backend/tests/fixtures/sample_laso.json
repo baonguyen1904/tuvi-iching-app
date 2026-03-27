@@ -1,0 +1,51 @@
+{
+  "nam": "Giap Tuat",
+  "menh": "Moc",
+  "cuc": "Thuy Nhi Cuc",
+  "than_cu": "Thien Di",
+  "menh_chu": "Tham Lang",
+  "than_chu": "Cu Mon",
+  "am_duong": "Duong Nam",
+  "cung": [
+    {"name": "Menh", "stars": [{"name": "Tu Vi (B)", "raw_name": "TU VI (B)", "variant": "B", "slug": "tu-vi-b"}]},
+    {"name": "Phu Mau", "stars": [{"name": "Thien Co (M)", "raw_name": "THIEN CO (M)", "variant": "M", "slug": "thien-co-m"}]},
+    {"name": "Phuc Duc", "stars": [{"name": "Thai Duong (D)", "raw_name": "THAI DUONG (D)", "variant": "D", "slug": "thai-duong-d"}]},
+    {"name": "Dien Trach", "stars": [{"name": "Vu Khuc (M)", "raw_name": "Vu Khuc (M)", "variant": "M", "slug": "vu-khuc-m"}]},
+    {"name": "Quan Loc", "stars": [{"name": "Thien Dong (D)", "raw_name": "THIEN DONG (D)", "variant": "D", "slug": "thien-dong-d"}]},
+    {"name": "No Boc", "stars": [{"name": "Liem Trinh (D)", "raw_name": "LIEM TRINH (D)", "variant": "D", "slug": "liem-trinh-d"}]},
+    {"name": "Thien Di", "stars": [{"name": "Thien Phu (B)", "raw_name": "Thien Phu (B)", "variant": "B", "slug": "thien-phu-b"}]},
+    {"name": "Tat Ach", "stars": [{"name": "Thai Am (H)", "raw_name": "THAI AM (H)", "variant": "H", "slug": "thai-am-h"}]},
+    {"name": "Tai Bach", "stars": [{"name": "Tham Lang (D)", "raw_name": "THAM LANG (D)", "variant": "D", "slug": "tham-lang-d"}]},
+    {"name": "Tu Tuc", "stars": [{"name": "Cu Mon (H)", "raw_name": "CU MON (H)", "variant": "H", "slug": "cu-mon-h"}]},
+    {"name": "Phu The", "stars": [{"name": "Thien Tuong (D)", "raw_name": "Thien Tuong (D)", "variant": "D", "slug": "thien-tuong-d"}]},
+    {"name": "Huynh De", "stars": [{"name": "Thien Luong (D)", "raw_name": "THIEN LUONG (D)", "variant": "D", "slug": "thien-luong-d"}]}
+  ],
+  "cung_10yrs": [
+    {"name": "Menh", "stars": [{"name": "Tu Vi (B)", "raw_name": "TU VI (B)", "variant": "B", "slug": "tu-vi-b"}]},
+    {"name": "Phu Mau", "stars": [{"name": "Thien Co (M)", "raw_name": "THIEN CO (M)", "variant": "M", "slug": "thien-co-m"}]},
+    {"name": "Phuc Duc", "stars": [{"name": "Thai Duong (D)", "raw_name": "THAI DUONG (D)", "variant": "D", "slug": "thai-duong-d"}]},
+    {"name": "Dien Trach", "stars": [{"name": "Vu Khuc (M)", "raw_name": "Vu Khuc (M)", "variant": "M", "slug": "vu-khuc-m"}]},
+    {"name": "Quan Loc", "stars": [{"name": "Thien Dong (D)", "raw_name": "THIEN DONG (D)", "variant": "D", "slug": "thien-dong-d"}]},
+    {"name": "No Boc", "stars": [{"name": "Liem Trinh (D)", "raw_name": "LIEM TRINH (D)", "variant": "D", "slug": "liem-trinh-d"}]},
+    {"name": "Thien Di", "stars": [{"name": "Thien Phu (B)", "raw_name": "Thien Phu (B)", "variant": "B", "slug": "thien-phu-b"}]},
+    {"name": "Tat Ach", "stars": [{"name": "Thai Am (H)", "raw_name": "THAI AM (H)", "variant": "H", "slug": "thai-am-h"}]},
+    {"name": "Tai Bach", "stars": [{"name": "Tham Lang (D)", "raw_name": "THAM LANG (D)", "variant": "D", "slug": "tham-lang-d"}]},
+    {"name": "Tu Tuc", "stars": [{"name": "Cu Mon (H)", "raw_name": "CU MON (H)", "variant": "H", "slug": "cu-mon-h"}]},
+    {"name": "Phu The", "stars": [{"name": "Thien Tuong (D)", "raw_name": "Thien Tuong (D)", "variant": "D", "slug": "thien-tuong-d"}]},
+    {"name": "Huynh De", "stars": [{"name": "Thien Luong (D)", "raw_name": "THIEN LUONG (D)", "variant": "D", "slug": "thien-luong-d"}]}
+  ],
+  "cung_12months": [
+    {"name": "Menh", "month": 1, "month_label": "Th.1", "stars": [{"name": "Tu Vi (B)", "raw_name": "TU VI (B)", "variant": "B", "slug": "tu-vi-b"}]},
+    {"name": "Phu Mau", "month": 2, "month_label": "Th.2", "stars": [{"name": "Thien Co (M)", "raw_name": "THIEN CO (M)", "variant": "M", "slug": "thien-co-m"}]},
+    {"name": "Phuc Duc", "month": 3, "month_label": "Th.3", "stars": [{"name": "Thai Duong (D)", "raw_name": "THAI DUONG (D)", "variant": "D", "slug": "thai-duong-d"}]},
+    {"name": "Dien Trach", "month": 4, "month_label": "Th.4", "stars": [{"name": "Vu Khuc (M)", "raw_name": "Vu Khuc (M)", "variant": "M", "slug": "vu-khuc-m"}]},
+    {"name": "Quan Loc", "month": 5, "month_label": "Th.5", "stars": [{"name": "Thien Dong (D)", "raw_name": "THIEN DONG (D)", "variant": "D", "slug": "thien-dong-d"}]},
+    {"name": "No Boc", "month": 6, "month_label": "Th.6", "stars": [{"name": "Liem Trinh (D)", "raw_name": "LIEM TRINH (D)", "variant": "D", "slug": "liem-trinh-d"}]},
+    {"name": "Thien Di", "month": 7, "month_label": "Th.7", "stars": [{"name": "Thien Phu (B)", "raw_name": "Thien Phu (B)", "variant": "B", "slug": "thien-phu-b"}]},
+    {"name": "Tat Ach", "month": 8, "month_label": "Th.8", "stars": [{"name": "Thai Am (H)", "raw_name": "THAI AM (H)", "variant": "H", "slug": "thai-am-h"}]},
+    {"name": "Tai Bach", "month": 9, "month_label": "Th.9", "stars": [{"name": "Tham Lang (D)", "raw_name": "THAM LANG (D)", "variant": "D", "slug": "tham-lang-d"}]},
+    {"name": "Tu Tuc", "month": 10, "month_label": "Th.10", "stars": [{"name": "Cu Mon (H)", "raw_name": "CU MON (H)", "variant": "H", "slug": "cu-mon-h"}]},
+    {"name": "Phu The", "month": 11, "month_label": "Th.11", "stars": [{"name": "Thien Tuong (D)", "raw_name": "Thien Tuong (D)", "variant": "D", "slug": "thien-tuong-d"}]},
+    {"name": "Huynh De", "month": 12, "month_label": "Th.12", "stars": [{"name": "Thien Luong (D)", "raw_name": "THIEN LUONG (D)", "variant": "D", "slug": "thien-luong-d"}]}
+  ]
+}

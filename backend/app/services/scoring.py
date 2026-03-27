@@ -6,7 +6,7 @@ from pathlib import Path
 from openpyxl import load_workbook
 from slugify import slugify
 
-from app.constants import DIMENSIONS, HOUSE_WEIGHTS, SUMMARY_AGE_WEIGHTS
+from app.constants import DIMENSIONS, HOUSE_WEIGHTS, SUMMARY_AGE_WEIGHTS, DIMENSION_LABELS
 from app.models.schemas import (
     StarRow,
     ScorePoint,
@@ -16,6 +16,11 @@ from app.models.schemas import (
 )
 
 logger = logging.getLogger(__name__)
+
+class ScoringError(Exception):
+    """Raised when scoring input data is invalid."""
+    pass
+
 
 # Dimension columns that have alert tag columns in the xlsx.
 # van_menh has NO alerts so it has no tag columns.
@@ -316,3 +321,97 @@ class ScoringEngine:
                         ))
 
         return alerts
+
+    def score(self, laso, nam_xem: int = 2026) -> ScoringResult:
+        """Main entry point: LasoData -> ScoringResult.
+
+        Args:
+            laso: LasoData (or compatible object with cung, cung_10yrs, cung_12months, than_cu).
+            nam_xem: Year being analyzed (for decade/monthly x-axis labels).
+
+        Returns:
+            ScoringResult with 8 dimensions scored.
+        """
+        # Validate input
+        if len(laso.cung) != 12:
+            raise ScoringError(f"Expected 12 lifetime cungs, got {len(laso.cung)}")
+        if len(laso.cung_12months) < 12:
+            raise ScoringError(f"Expected 12 monthly cungs, got {len(laso.cung_12months)}")
+
+        than_cu = laso.than_cu
+
+        dimensions: dict[str, DimensionScores] = {}
+        all_alerts: list[Alert] = []
+
+        for dim in DIMENSIONS:
+            # Step 1: Build raw scores for all 3 timeframes
+            lifetime_raws = self._build_raw_scores(laso.cung, dim)
+            decade_raws = self._build_raw_scores(laso.cung_10yrs, dim)
+            monthly_raws = self._build_raw_scores(laso.cung_12months, dim)
+
+            # Step 2: Anchor from LIFETIME data only
+            anchor = self._calc_anchor(lifetime_raws, dim, than_cu)
+
+            # Step 3: Final scores -- Lifetime (12 points)
+            lifetime_cung_order = [c.name.lower() for c in laso.cung]
+            lifetime_periods = [f"{a}-{a+10}" for a in range(0, 120, 10)]
+            lifetime_points = self._calc_final(
+                lifetime_raws, anchor, lifetime_periods, lifetime_cung_order
+            )
+
+            # Step 3: Final scores -- Decade (first 10 of 12 cungs)
+            decade_cungs = laso.cung_10yrs[:-2]
+            decade_cung_order = [c.name.lower() for c in decade_cungs]
+            decade_periods = [str(y) for y in range(nam_xem, nam_xem + 10)]
+            decade_points = self._calc_final(
+                decade_raws, anchor, decade_periods, decade_cung_order
+            )
+
+            # Step 3: Final scores -- Monthly (13 points, first prepended)
+            monthly_cung_order = [laso.cung_12months[0].name.lower()]
+            monthly_cung_order += [mc.name.lower() for mc in laso.cung_12months]
+            monthly_periods = [f"Th.{laso.cung_12months[0].month}/{nam_xem}"]
+            monthly_periods += [
+                f"Th.{mc.month}/{nam_xem}" for mc in laso.cung_12months
+            ]
+            monthly_points = self._calc_final(
+                monthly_raws, anchor, monthly_periods, monthly_cung_order
+            )
+
+            # Step 4: Alerts (skip for van_menh)
+            alerts: list[Alert] = []
+            if dim != "van_menh":
+                # Lifetime alerts
+                lifetime_alert_cungs = list(laso.cung)
+                alerts.extend(
+                    self._detect_alerts(lifetime_points, lifetime_alert_cungs, dim, "lifetime")
+                )
+                # Decade alerts
+                alerts.extend(
+                    self._detect_alerts(decade_points, list(decade_cungs), dim, "decade")
+                )
+                # Monthly alerts
+                monthly_alert_cungs = [laso.cung_12months[0]] + list(laso.cung_12months)
+                alerts.extend(
+                    self._detect_alerts(monthly_points, monthly_alert_cungs, dim, "monthly")
+                )
+
+            # Step 5: Summary score
+            summary = self._summary_score(lifetime_points)
+
+            dimensions[dim] = DimensionScores(
+                dimension=dim,
+                label=DIMENSION_LABELS[dim],
+                lifetime=lifetime_points,
+                decade=decade_points,
+                monthly=monthly_points,
+                alerts=alerts,
+                summary_score=summary,
+            )
+            all_alerts.extend(alerts)
+
+        # Sort all_alerts: level desc, then by dimension order
+        dim_order = {d: i for i, d in enumerate(DIMENSIONS)}
+        all_alerts.sort(key=lambda a: (-a.level, dim_order.get(a.dimension, 99)))
+
+        return ScoringResult(dimensions=dimensions, all_alerts=all_alerts)
