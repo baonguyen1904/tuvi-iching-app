@@ -5,6 +5,9 @@
 **Estimated effort:** 3-4 days
 **Dependencies:** None
 **Output:** `services/scraper_cohoc.py` + `services/scraper_tuvivn.py`
+**Spec file** `docs/superpowers/specs/2026-03-26-scraper-design.md`
+**Plan file** `docs/superpowers/plans/2026-03-26-scraper-implementation.md`
+**Claude code session** = `0a133f23-e1c2-40fe-942c-04a7795a5441`
 
 ---
 

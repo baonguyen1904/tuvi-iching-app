@@ -5,6 +5,9 @@
 **Estimated effort:** 3-5 days (including KB writing + prompt iteration)
 **Dependencies:** Task 02 (ScoringResult), Expert sessions (KB content)
 **Output:** Python module `services/ai_engine.py` + KB markdown files
+**Spec file** `docs/superpowers/specs/2026-03-27-ai-pipeline-design.md`
+**Plan file** `docs/superpowers/plans/2026-03-27-ai-pipeline-implementation.md`
+**Mock expert data** `data/mock_expert_input/` (chờ expert điền thực tế)
 
 ---
 
